@@ -1,3 +1,4 @@
+import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import scipy
@@ -23,10 +24,10 @@ def robot_layer(df_filtered, df_eliminated, control_name, output_path):
         'Normalized Values'].agg(['mean', 'std']).reset_index()
     wt_stats.rename(columns={'mean': 'Control Mean', 'std': 'Control STD'}, inplace=True)
     df_merged = pd.merge(df_filtered, wt_stats, on=['Regions', 'Lipids'])
-    df_merged['Z Score'] = (df_merged['Normalized Values'] - df_merged['Control Mean']) / df_merged['Control STD']
+    df_merged['Z Scores'] = (df_merged['Normalized Values'] - df_merged['Control Mean']) / df_merged['Control STD']
 
     # TODO: ask about her z-score calculations
-    average_z_scores = df_merged.groupby(['Mouse ID', 'Lipid Class'])['Z Score'].mean().reset_index(name='Average Z')
+    average_z_scores = df_merged.groupby(['Mouse ID', 'Lipid Class'])['Z Scores'].mean().reset_index(name='Average Z')
     df_merged = pd.merge(df_merged, average_z_scores, on=['Lipid Class', 'Mouse ID'])
 
     # Save the eliminated lipids and the normalized data with the Z Scores
@@ -34,5 +35,9 @@ def robot_layer(df_filtered, df_eliminated, control_name, output_path):
         df_eliminated.to_excel(writer, sheet_name='Eliminated Lipids')
         df_merged.to_excel(writer, sheet_name='Data for Correlations')
 
-#
-#     # TODO: graphs
+    return df_merged
+
+
+def zscore_graph(df_merged):
+    plt.boxplot(df_merged.groupby(['Mouse ID', 'Lipid Class'])['Z Score'])
+    plt.show()

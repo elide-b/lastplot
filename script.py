@@ -10,17 +10,18 @@ data_sheet = 'Quantification'
 mice_sheet = 'Sheet1'
 output_path = 'C:/Users/Elide/Documents/git/automize-science'
 control_name = 'WT'
-experimental_name = 'FTD'
+experimental_name = 'FTLD'
 color = sns.color_palette('Set2')
 
 df, df_mice = load_data(file_path, data_sheet, mice_sheet)
-df_final, df_eliminated = data_cleanup(df, df_mice)
-df_merged = robot_layer(df_final, df_eliminated, control_name, output_path=output_path)
-zscore_graph_lipid(df_merged, control_name, experimental_name, color)
-zscore_graph_regions(df_merged, control_name, experimental_name, color)
+df_clean, df_eliminated = data_cleanup(df, df_mice)
+df_final = robot_layer(df_clean, df_eliminated, control_name, output_path=output_path)
+# zscore_graph_lipid(df_final, control_name, experimental_name)
+exit()
+zscore_graph_regions(df_final, control_name, experimental_name)
 
 # All lipids graphs
-sns.boxplot(x='Lipids', y='Z Scores', hue='Lipids', data=df_merged, palette='Paired')
+sns.boxplot(x='Lipids', y='Z Scores', hue='Lipids', data=df_final, palette='Paired')
 
 plt.xlabel('Lipids')
 plt.ylabel('Z Score')

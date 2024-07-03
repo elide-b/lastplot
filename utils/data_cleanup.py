@@ -100,8 +100,8 @@ def data_cleanup(df, df_mice, output_path):
 
     if not os.path.exists(output_path + "/output"):
         os.makedirs(output_path + "/output")
-    if not os.path.exists(output_path + "/graphs"):
-        os.makedirs(output_path + "/graphs")
+    if not os.path.exists(output_path + "/output/graphs"):
+        os.makedirs(output_path + "/output/graphs")
 
     with pd.ExcelWriter(output_path + "/output/Output file.xlsx") as writer:
         df_eliminated.to_excel(writer, sheet_name="Eliminated Lipids")

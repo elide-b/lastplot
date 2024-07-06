@@ -1,5 +1,6 @@
 from automize_science.computing_statistics import *
 from automize_science.data_cleanup import *
+from automize_science.graph_constructor import *
 from automize_science.saving import *
 
 
@@ -21,7 +22,10 @@ def workflow(file_path, data_sheet, mice_sheet, output_path, control_name, exper
     statistics = statistics_tests(df_clean=df_clean, control_name=control_name)
 
     df_final = z_scores(df_clean=df_clean, statistics=statistics)
-    save_df(df_final=df_final, output_path=output_path)
-
+    save_values(df_final=df_final, output_path=output_path)
+    save_zscores(df_final=df_final, output_path=output_path)
+    wb = load_workbook(output_path + "/output/Output file.xlsx")
+    wb.create_sheet(title="Comments")
+    wb.save(output_path + "/output/Output file.xlsx")
     zscore_graph_lipid(df_final, control_name, experimental_name, output_path=output_path, palette=palette)
     zscore_graph_lipid_class(df_final, control_name, experimental_name, output_path=output_path, palette=palette)

@@ -1,75 +1,140 @@
+import os
+
+import matplotlib.pyplot as plt
+import scipy.stats as stats
 import seaborn as sns
-from matplotlib import pyplot as plt
-from statannotations.Annotator import Annotator
-
-# TODO: graphs for single lipids, graphs for lipid class, one graph for all of them. BY GENOTYPE, BY REGION
+import starbars
+from openpyxl import load_workbook
 
 
-def get_test(shapiro, levene):
+def get_test(shapiro, levene, control_values, experimental_values):
     if shapiro < 0.05 and levene < 0.05:
-        test = "t-test_ind"
+        stat, pvalue = stats.ttest_ind(control_values, experimental_values)
+        test = "T-Test"
     elif shapiro < 0.05 and levene > 0.05:
-        test = "t-test_welch"
+        stat, pvalue = stats.ttest_ind(control_values, experimental_values, equal_var=False)
+        test = "Welch T-Test"
     elif shapiro > 0.05 and levene > 0.05:
-        test = "Mann-Whitney"
+        stat, pvalue = stats.mannwhitneyu(control_values, experimental_values)
+        test = "Mann Whitney"
     else:
-        test = None
+        pvalue = 0
+        test = "no test"
 
-    return test
+    return pvalue, test
 
 
-def zscore_graph_lipid(df_final, control_name, experimental_name, output_path):
+# Graphs by Z scores
+def zscore_graph_lipid(df_final, control_name, experimental_name, output_path, palette):
+    if not os.path.exists(output_path + "/output/zscore_graphs/lipid"):
+        os.makedirs(output_path + "/output/zscore_graphs/lipid")
+    order = [control_name, experimental_name]
     for (region, lipid), data in df_final.groupby(["Regions", "Lipids"]):
         shapiro = data.iloc[0]["Shapiro Normality"]
-        print(shapiro)
         levene = data.iloc[0]["Levene Equality"]
+        control_group = data[data["Genotype"] == control_name]
+        experimental_group = data[data["Genotype"] != control_name]
+        control_values = control_group["Z Scores"]
+        experimental_values = experimental_group["Z Scores"]
 
         print(f"Creating graph for {lipid} in {region}")
 
-        order = [control_name, experimental_name]
+        sns.boxplot(x="Genotype", y="Z Scores", data=data, order=order, hue="Genotype", palette=palette)
+        sns.stripplot(x="Genotype", y="Z Scores", data=data, order=order, color="k", size=4)
 
-        ax = sns.boxplot(x="Genotype", y="Z Scores", data=data, order=order, hue="Genotype", palette="Set1")
-        ax = sns.stripplot(x="Genotype", y="Z Scores", data=data, order=order, color="k", size=4)
-
-        test = get_test(shapiro, levene)
-        annotator = Annotator(
-            ax, pairs=[(control_name, experimental_name)], data=data, x="Genotype", y="Z Scores", order=order
-        )
-        annotator.configure(test=test, text_format="star", loc="outside")
-        annotator.apply_and_annotate()
+        pvalue, test = get_test(shapiro, levene, control_values, experimental_values)
+        pairs = [(control_name, experimental_name, pvalue)]
         plt.xlabel("Genotype")
         plt.ylabel("Z Scores")
         plt.title(f"Z Scores Distribution for {lipid} in {region}: {control_name} vs {experimental_name}")
-        plt.grid(True)
-        plt.tight_layout()
-        plt.show()
-        # plt.savefig(output_path + "/output/graphs/" + f"Z Scores for {lipid} in {region}.png", dpi=1200)
+        starbars.draw_annotation(pairs)
+        plt.savefig(output_path + "/output/graphs/" + f"Z Scores for {lipid} in {region}.png", dpi=1200)
+        plt.close()
+
+        wb = load_workbook(output_path + "/output/Output file.xlsx")
+        ws = wb["Comments"]
+
+        # Append a row of strings
+        comment = [f"For {lipid} in {region}, {test} was performed. P-value is {pvalue}."]
+        ws.append(comment)
+        wb.save(output_path + "/output/Output file.xlsx")
+
+
+def zscore_graph_lipid_class(df_final, control_name, experimental_name, output_path, palette):
+    if not os.path.exists(output_path + "/output/zscore_graphs/lipid_class"):
+        os.makedirs(output_path + "/output/zscore_graphs/lipid_class")
+    order = [control_name, experimental_name]
+    for (region, lipid), data in df_final.groupby(["Regions", "Lipid Class"]):
+        shapiro = data.iloc[0]["Shapiro Normality"]
+        levene = data.iloc[0]["Levene Equality"]
+        control_group = data[data["Genotype"] == control_name]
+        experimental_group = data[data["Genotype"] != control_name]
+        control_values = control_group["Z Scores"]
+        experimental_values = experimental_group["Z Scores"]
+
+        print(f"Creating graph for {lipid} in {region}")
+        sns.boxplot(x="Genotype", y="Average Z Scores", hue="Genotype", data=data, order=order, palette=palette)
+        sns.stripplot(x="Genotype", y="Average Z Scores", data=data, order=order, color="k", size=4)
+
+        pvalue = get_test(shapiro, levene, control_values, experimental_values)
+        pairs = [(control_name, experimental_name, pvalue)]
+        plt.xlabel("Genotype")
+        plt.ylabel("Z Score")
+        plt.title(f"Z Scores Distribution of {lipid} in {region}: {control_name} vs {experimental_name}")
+        starbars.draw_annotation(pairs)
+        plt.savefig(output_path + f"/output/graphs/Z Scores Distribution of {lipid} by {region}.png", dpi=1200)
         plt.close()
 
 
-def zscore_graph_regions(df_merged, control_name, experimental_name, output_path):
+# Graphs by values
+def values_graph_lipid(df_final, control_name, experimental_name, output_path, palette):
+    if not os.path.exists(output_path + "/output/value_graphs/lipid"):
+        os.makedirs(output_path + "/output/value_graphs/lipid")
     order = [control_name, experimental_name]
-    for lipid in df_merged["Lipid Class"].unique():
-        specific_lipid_data = df_merged[df_merged["Lipid Class"] == lipid]
-        ax = sns.boxplot(x="Lipids", y="Z Scores", hue="Regions", data=specific_lipid_data, order=order, dodge=True)
-        sns.swarmplot(
-            x="Lipids",
-            y="Z Scores",
-            hue="Regions",
-            data=specific_lipid_data,
-            order=order,
-            color="none",
-            marker="o",
-            edgecolor="k",
-            size=6,
-            linewidth=0.5,
-            dodge=True,
-        )
+    for (region, lipid), data in df_final.groupby(["Regions", "Lipids"]):
+        shapiro = data.iloc[0]["Shapiro Normality"]
+        levene = data.iloc[0]["Levene Equality"]
+        control_group = data[data["Genotype"] == control_name]
+        experimental_group = data[data["Genotype"] != control_name]
+        control_values = control_group["Normalized Values"]
+        experimental_values = experimental_group["Normalized Values"]
 
-    plt.xlabel("Regions")
-    plt.ylabel("Z Score")
-    plt.title(f"Z Scores Distribution by Region: {control_name} vs {experimental_name}")
-    plt.grid(True)
-    plt.tight_layout()
-    plt.savefig(output_path + "/output/graphs/Z Scores Distribution of Lipid Classes by Region.png", dpi=1200)
-    plt.show()
+        print(f"Creating graph for {lipid} in {region}")
+
+        sns.boxplot(x="Genotype", y="Normalized Values", data=data, order=order, hue="Genotype", palette=palette)
+        sns.stripplot(x="Genotype", y="Normalized Values", data=data, order=order, color="k", size=4)
+
+        pvalue = get_test(shapiro, levene, control_values, experimental_values)
+        pairs = [(control_name, experimental_name, pvalue)]
+        plt.xlabel("Genotype")
+        plt.ylabel("Normalized Values")
+        plt.title(f"Normalized Values Distribution for {lipid} in {region}: {control_name} vs {experimental_name}")
+        starbars.draw_annotation(pairs)
+        plt.savefig(output_path + "/output/graphs/" + f"Normalized Values for {lipid} in {region}.png", dpi=1200)
+        plt.close()
+
+
+def values_graph_lipid_class(df_final, control_name, experimental_name, output_path, palette):
+    if not os.path.exists(output_path + "/output/value_graphs/lipid_class"):
+        os.makedirs(output_path + "/output/value_graphs/lipid_class")
+    order = [control_name, experimental_name]
+    for (region, lipid), data in df_final.groupby(["Regions", "Lipid Class"]):
+        shapiro = data.iloc[0]["Shapiro Normality"]
+        levene = data.iloc[0]["Levene Equality"]
+        control_group = data[data["Genotype"] == control_name]
+        experimental_group = data[data["Genotype"] != control_name]
+        control_values = control_group["Normalized Values"]
+        experimental_values = experimental_group["Normalized Values"]
+
+        print(f"Creating graph for {lipid} in {region}")
+        sns.boxplot(x="Genotype", y="Normalized Values", hue="Genotype", data=data, order=order, palette=palette)
+        sns.stripplot(x="Genotype", y="Normalized Values", data=data, order=order, color="k", size=4)
+
+        pvalue = get_test(shapiro, levene, control_values, experimental_values)
+        pairs = [(control_name, experimental_name, pvalue)]
+        plt.xlabel("Genotype")
+        plt.ylabel("Normalized Values")
+        plt.title(f"Normalized Values Distribution of {lipid} in {region}: {control_name} vs {experimental_name}")
+        starbars.draw_annotation(pairs)
+        plt.savefig(output_path + f"/output/graphs/Normalized Values Distribution of {lipid} by {region}.png", dpi=1200)
+        plt.close()

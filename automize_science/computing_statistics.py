@@ -42,23 +42,19 @@ def statistics_tests(df_clean, control_name):
     return statistics
 
 
-def z_scores(df_clean, statistics, output_path):
+def z_scores(df_clean, statistics):
 
     print("Computing the Z scores and the average Z scores per lipid class")
 
-    # Z Scores and
-    # TODO: fix average Z Scores per lipid class
+    # Z Scores and average Z Scores per lipid class
     grouped = df_clean.groupby(["Regions", "Lipids"])["Normalized Values"].agg(["mean", "std"]).reset_index()
     grouped.rename(columns={"mean": "Mean", "std": "STD"}, inplace=True)
     df_final = pd.merge(df_clean, grouped, on=["Regions", "Lipids"], how="left")
-    df_final["Z Scores"] = (df_final["Values"] - df_final["Mean"]) / df_final["STD"]
-    average_z_scores = df_final.groupby(["Regions", "Lipid Class"])["Z Scores"].mean().reset_index(name="Average Z")
-    df_final = pd.merge(df_final, average_z_scores, on=["Lipid Class", "Regions"])
+    df_final["Z Scores"] = (df_final["Normalized Values"] - df_final["Mean"]) / df_final["STD"]
+    average_z_scores = (
+        df_final.groupby(["Regions", "Lipid Class", "Mouse ID"])["Z Scores"].mean().reset_index(name="Average Z Scores")
+    )
+    df_final = pd.merge(df_final, average_z_scores, on=["Lipid Class", "Regions", "Mouse ID"])
     df_final = pd.merge(df_final, statistics, on=["Regions", "Lipids"], how="left")
-
-    # Save the eliminated lipids and the normalized data with the Z Scores
-    with pd.ExcelWriter(output_path + "/output/Output file.xlsx") as writer:
-        df_final.to_excel(writer, sheet_name="Data for Correlations")
-    print("Saving to output file")
 
     return df_final

@@ -46,6 +46,7 @@ def data_cleanup(df, df_mice, output_path):
                 pass
 
     cleaned_values = [float(value) for value in values]
+    lipids = [string.replace("/", "-") for string in lipids]
 
     df_sorted = pd.DataFrame(
         {
@@ -100,8 +101,6 @@ def data_cleanup(df, df_mice, output_path):
 
     if not os.path.exists(output_path + "/output"):
         os.makedirs(output_path + "/output")
-    if not os.path.exists(output_path + "/output/graphs"):
-        os.makedirs(output_path + "/output/graphs")
 
     with pd.ExcelWriter(output_path + "/output/Output file.xlsx") as writer:
         df_eliminated.to_excel(writer, sheet_name="Eliminated Lipids")

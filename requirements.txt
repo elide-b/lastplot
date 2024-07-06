@@ -1,8 +1,8 @@
 numpy~=2.0
 pandas~=2.2
+openpyxl~=3.1
 scipy~=1.13
 matplotlib~=3.9
 seaborn~=0.13
-statannot~=0.2
-statsmodels~=0.14
+starbars~=1.0
 scikit-learn~=1.5

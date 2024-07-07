@@ -4,4 +4,4 @@ Starting from a file containing the **pmol/mg** values per each sample, this pac
 analysis and visualization.
 """
 
-__version__ = '1.0.0'
+__version__ = "1.0.0"

@@ -10,12 +10,12 @@ analysis and visualization.
 
 Automize Science includes the following features:
 
-- Data Sanitization: Clean and prepare data for analysis.
-- Data Normalization: Normalize values to ensure consistency across samples.
+- Data Sanitization: Clean and prepare data for analysis, removing internal standard samples and non value samples.
+- Data Normalization: Normalize values with log10 to ensure consistency across samples.
 - Normality Check: Use the Shapiro-Wilk test to check for normality of residuals.
-- Variance Check: Use Levene's test to assess the equality of variances.
+- Equality of Variance Check: Use Levene's test to assess the equality of variances.
 - Statistical Significance Annotation: Annotate boxplots with significance levels using t-test, Welch's t-test, or
-  Mann-Whitney test depending on the data requirements.
+  Mann-Whitney test depending on the data requirements, through the starbars package.
 - Visualization Tools: Create boxplots to aid in data interpretation.
 
 ## Installation
@@ -37,15 +37,31 @@ pip install .
 
 ## Usage
 
-Here are some examples of how to use Automize Science:
+Here is one example of how to use Automize Science:
 
 ```
 import automize_science 
 
 # Example usage
-result = automize_science.analyze_data('path/to/your/datafile.xlsx')
-as.plot_graph(result)
+df = automize_science.data_workflow(
+    file_path="My project.xlsx",
+    data_sheet="Data Sheet",
+    mice_sheet="Mice Sheet",
+    output_path="C:/Users/[YOUR-USERNAME]/Documents/example",
+    control_name="CM",
+)
+
+automize_science.zscore_graph_region(
+    df_final=df,
+    control_name="CM",
+    experimental_name="EM",
+    output_path="C:/Users/[YOUR-USERNAME]/Documents/example",
+    palette="Set2",
+    show=True,
+)
 ```
+
+Returns graphs.
 
 ## Examples
 

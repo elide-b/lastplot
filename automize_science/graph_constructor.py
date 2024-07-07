@@ -6,6 +6,15 @@ import seaborn as sns
 import starbars
 from openpyxl import load_workbook
 
+__all__ = [
+    "value_graph_lipid_class",
+    "value_graph_region",
+    "values_graph_lipid",
+    "zscore_graph_lipid_class",
+    "zscore_graph_region",
+    "zscore_graph_lipid",
+]
+
 
 def save_sheet(comment, sheet_name, output_path):
 

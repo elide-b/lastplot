@@ -17,6 +17,18 @@ def load_data(datapath, sheet_name, mice_sheet):
 
 
 def data_cleanup(df, df_mice, output_path):
+    """
+    Cleans and processes lipid data from the provided DataFrame.
+
+    This function performs several steps to clean and process lipid data:
+    1. Removes 'Internal Standard' samples.
+    2. Transforms and reshapes the data to long format.
+    3. Filters out lipids with 3 or more missing values per region.
+    4. Replaces zero values with 80% of the minimum value for the corresponding group.
+    5. Logs and normalizes the cleaned values.
+    6. Saves the cleaned and eliminated lipid data to an Excel file.
+
+    """
 
     print("Cleaning data")
     print("Removing the Internal Standard samples")

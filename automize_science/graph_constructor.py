@@ -7,8 +7,8 @@ import starbars
 from openpyxl import load_workbook
 
 __all__ = [
-    "value_graph_lipid_class",
-    "value_graph_region",
+    "values_graph_lipid_class",
+    "values_graph_region",
     "values_graph_lipid",
     "zscore_graph_lipid_class",
     "zscore_graph_region",
@@ -49,6 +49,31 @@ def get_test(shapiro, levene, control_values, experimental_values):
 
 # Graphs by Z scores
 def zscore_graph_lipid(df_final, control_name, experimental_name, output_path, palette, show=True):
+    """
+    The `zscore_graph_lipid` function generates boxplots and statistical annotations for visualizing Z scores of lipids
+    across regions. It performs the following tasks:
+
+    - Creates directories for saving output graphs if they do not exist.
+    - Iterates through each region and lipid combination in the final DataFrame (`df_final`).
+    - Calculates Shapiro-Wilk and Levene's test results for normality and equality of variances.
+    - Separates data into control and experimental groups based on `control_name` and `experimental_name`.
+    - Plots boxplots to visualize the distribution of Z scores, distinguishing between control and experimental groups.
+    - Retrieves statistical test results (`pvalue` and `test`) using a custom function (`get_test`).
+    - Annotates the plot with statistical significance indicators using `starbars.draw_annotation`.
+    - Saves each plot as a PNG file in the specified `output_path`.
+    - Optionally displays the plot (`show=True`) and closes it after display.
+
+    The function also saves comments regarding the statistical tests performed for each lipid and region in an Excel
+    sheet named "Comments" within the `output_path`.
+
+    :param df_final: DataFrame containing Z scores and statistical test results.
+    :param control_name: Name of the control group.
+    :param experimental_name:Name of the experimental group.
+    :param output_path: Path of the output folder.
+    :param palette: Color palette for plotting.
+    :param show: Whether to display plots interactively (default True).
+
+    """
 
     if not os.path.exists(output_path + "/output/zscore_graphs/lipid"):
         os.makedirs(output_path + "/output/zscore_graphs/lipid")
@@ -83,6 +108,24 @@ def zscore_graph_lipid(df_final, control_name, experimental_name, output_path, p
 
 
 def zscore_graph_region(df_final, control_name, experimental_name, output_path, palette, show=True):
+    """
+    The `zscore_graph_region` function generates boxplots to visualize the distribution of Z scores across different lipids within each region. It performs the following tasks:
+
+    - Creates directories for saving output graphs if they do not exist.
+    - Iterates through each region in the DataFrame (`df_final`).
+    - Plots boxplots to show the distribution of Z scores for each lipid, distinguishing between control and experimental groups (`control_name` and `experimental_name`).
+    - Customizes plots with appropriate labels, titles, and rotations for better visualization.
+    - Saves each plot as a PNG file in the specified `output_path`.
+    - Optionally displays the plot (`show=True`) and closes it after display.
+
+    :param df_final: DataFrame containing Z scores and statistical test results.
+    :param control_name: Name of the control group.
+    :param experimental_name: Name of the experimental group.
+    :param output_path: Path of the output folder.
+    :param palette: Color palette for plotting.
+    :param show: Whether to display plots interactively (default True).
+
+    """
 
     if not os.path.exists(output_path + "/output/zscore_graphs/region"):
         os.makedirs(output_path + "/output/zscore_graphs/region")
@@ -105,6 +148,24 @@ def zscore_graph_region(df_final, control_name, experimental_name, output_path, 
 
 
 def zscore_graph_lipid_class(df_final, control_name, experimental_name, output_path, palette, show=True):
+    """
+    The `zscore_graph_lipid_class` function generates boxplots to visualize the distribution of Z scores across different lipid classes within each region. It performs the following tasks:
+
+    - Creates directories for saving output graphs if they do not exist.
+    - Iterates through each region in the DataFrame (`df_final`).
+    - Plots boxplots to show the distribution of Z scores for each lipid class, distinguishing between control and experimental groups (`control_name` and `experimental_name`).
+    - Customizes plots with appropriate labels, titles, and rotations for better visualization.
+    - Saves each plot as a PNG file in the specified `output_path`.
+    - Optionally displays the plot (`show=True`) and closes it after display.
+
+    :param df_final: Final DataFrame containing Z scores and statistical test results.
+    :param control_name: Name of the control group genotype.
+    :param experimental_name: Name of the experimental group genotype.
+    :param output_path: Path to save output graphs.
+    :param palette: Color palette for plotting.
+    :param show: Whether to display plots interactively (default True).
+
+    """
 
     if not os.path.exists(output_path + "/output/zscore_graphs/lipid_class"):
         os.makedirs(output_path + "/output/zscore_graphs/lipid_class")
@@ -135,7 +196,26 @@ def zscore_graph_lipid_class(df_final, control_name, experimental_name, output_p
 
 # Graphs by values
 def values_graph_lipid(df_final, control_name, experimental_name, output_path, palette, show=True):
+    """
+    The `values_graph_lipid` function generates boxplots and statistical annotations for visualizing the distribution of normalized values of lipids across regions. It performs the following tasks:
 
+    - Creates directories for saving output graphs if they do not exist.
+    - Iterates through each region and lipid combination in the DataFrame (`df_final`).
+    - Plots boxplots to visualize the distribution of normalized values for each lipid, distinguishing between control and experimental groups (`control_name` and `experimental_name`).
+    - Customizes plots with appropriate labels, titles, and rotations for better visualization.
+    - Saves each plot as a PNG file in the specified `output_path`.
+    - Optionally displays the plot (`show=True`) and closes it after display.
+
+    The function also saves comments regarding the statistical tests performed for each lipid and region in an Excel sheet named "Comments" within the `output_path`.
+
+    :param df_final: DataFrame containing normalized values and statistical test results.
+    :param control_name: Name of the control group.
+    :param experimental_name: Name of the experimental group.
+    :param output_path: Path to save output graphs.
+    :param palette: Color palette for plotting.
+    :param show: Whether to display plots interactively (default True).
+
+    """
     if not os.path.exists(output_path + "/output/value_graphs/lipid"):
         os.makedirs(output_path + "/output/value_graphs/lipid")
     order = [control_name, experimental_name]
@@ -168,7 +248,24 @@ def values_graph_lipid(df_final, control_name, experimental_name, output_path, p
         save_sheet(comment, "Comments", output_path)
 
 
-def value_graph_region(df_final, control_name, experimental_name, output_path, palette, show=True):
+def values_graph_region(df_final, control_name, experimental_name, output_path, palette, show=True):
+    """
+    The `values_graph_region` function generates boxplots to visualize the distribution of normalized values across different lipids within each region. It performs the following tasks:
+
+    - Creates directories for saving output graphs if they do not exist.
+    - Iterates through each region in the DataFrame (`df_final`).
+    - Plots boxplots to show the distribution of normalized values for each lipid, distinguishing between control and experimental groups (`control_name` and `experimental_name`).
+    - Customizes plots with appropriate labels, titles, and rotations for better visualization.
+    - Saves each plot as a PNG file in the specified `output_path`.
+    - Optionally displays the plot (`show=True`) and closes it after display.
+
+    :param df_final: DataFrame containing normalized values and statistical test.
+    :param control_name: Name of the control group genotype.
+    :param experimental_name: Name of the experimental group.
+    :param output_path: Path to save output graphs.
+    :param palette: Color palette for plotting.
+    :param show: Whether to display plots interactively (default True).
+    """
 
     if not os.path.exists(output_path + "/output/value_graphs/region"):
         os.makedirs(output_path + "/output/value_graphs/region")
@@ -193,7 +290,25 @@ def value_graph_region(df_final, control_name, experimental_name, output_path, p
         plt.close()
 
 
-def value_graph_lipid_class(df_final, control_name, experimental_name, output_path, palette, show=True):
+def values_graph_lipid_class(df_final, control_name, experimental_name, output_path, palette, show=True):
+    """
+    The `values_graph_lipid_class` function generates boxplots to visualize the distribution of normalized values across different lipid classes within each region. It performs the following tasks:
+
+    - Creates directories for saving output graphs if they do not exist.
+    - Iterates through each region in the DataFrame (`df_final`).
+    - Plots boxplots to show the distribution of normalized values for each lipid class, distinguishing between control and experimental groups (`control_name` and `experimental_name`).
+    - Customizes plots with appropriate labels, titles, and rotations for better visualization.
+    - Saves each plot as a PNG file in the specified `output_path`.
+    - Optionally displays the plot (`show=True`) and closes it after display.
+
+
+    :param df_final: DataFrame containing normalized values and statistical test results.
+    :param control_name: Name of the control group.
+    :param experimental_name: Name of the experimental group.
+    :param output_path: Path to save output graphs.
+    :param palette: Color palette for plotting.
+    :param show: Whether to display plots interactively (default True).
+    """
 
     if not os.path.exists(output_path + "/output/value_graphs/lipid_class"):
         os.makedirs(output_path + "/output/value_graphs/lipid_class")

@@ -23,7 +23,7 @@ Automize Science includes the following features:
 You can install the package via pip:
 
 ```
-pip install automize-science
+pip install automize_science
 ```
 
 \

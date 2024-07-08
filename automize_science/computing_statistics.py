@@ -2,10 +2,13 @@ import pandas as pd
 import scipy.stats as stats
 
 
-# TODO: write all of this info into smt
-
-
 def statistics_tests(df_clean, control_name):
+    """
+    Performs statistical tests on cleaned lipid data to check for normality and equality of variances.
+
+    This function performs the Shapiro-Wilk test for normality of residuals and Levene's test for equality
+    of variances between control and experimental groups for each combination of region and lipid.
+    """
 
     regions = []
     lipids = []
@@ -43,6 +46,14 @@ def statistics_tests(df_clean, control_name):
 
 
 def z_scores(df_clean, statistics):
+    """
+    Performs statistical tests to check for normality of residuals and equality of variances.
+
+    This function:
+    1. Tests the normality of the residuals using the Shapiro-Wilk test.
+    2. Tests the equality of variances using Levene's test.
+    3. Compiles the results of these tests for each region and lipid.
+    """
 
     print("Computing the Z scores and the average Z scores per lipid class")
 

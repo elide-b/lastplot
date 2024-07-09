@@ -214,8 +214,8 @@ def values_graph_lipid(df_final, control_name, experimental_name, output_path, p
     :param output_path: Path to save output graphs.
     :param palette: Color palette for plotting.
     :param show: Whether to display plots interactively (default True).
-
     """
+
     if not os.path.exists(output_path + "/output/value_graphs/lipid"):
         os.makedirs(output_path + "/output/value_graphs/lipid")
     order = [control_name, experimental_name]

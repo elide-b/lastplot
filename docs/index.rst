@@ -32,7 +32,7 @@ You can install the package via pip:
 
 .. code-block:: bash
 
-    pip install automize-science
+    pip install automize_science
 
 Alternatively, you can install the package from the source:
 

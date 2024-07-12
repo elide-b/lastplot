@@ -38,30 +38,43 @@ def save_values(df_final, output_path):
     df_save = df_final.pivot_table(
         index=["Regions", "Mouse ID", "Genotype"],
         columns=["Lipids", "Lipid Class"],
-        values=["Values", "Normalized Values"],
-        aggfunc="first",
+        values=["Values", "Log10 Transformed"],
     )
     df_save.reset_index(inplace=True)
 
     # Save the eliminated lipids and the normalized data with the Z Scores
     with pd.ExcelWriter(output_path + "/output/Output file.xlsx", engine="openpyxl", mode="a") as writer:
-        df_save.to_excel(writer, sheet_name="Data for Correlations")
+        try:
+            df_save.to_excel(writer, sheet_name="Values and Transformed Values")
+        except PermissionError:
+            print("Close the Excel file and try again.")
 
-    color_df(df_final, sheet="Data for Correlations", output_path=output_path)
+    color_df(df_final, sheet="Values and Transformed Values", output_path=output_path)
 
 
 def save_zscores(df_final, output_path):
     df_save = df_final.pivot_table(
         index=["Regions", "Mouse ID", "Genotype"],
-        columns=["Lipids", "Lipid Class"],
-        values=["Average Z Scores", "Z Scores"],
+        columns=["Lipids"],
+        values=["Z Scores"],
     )
     df_save.reset_index(inplace=True)
 
+    df_save2 = df_final.pivot_table(
+        index=["Regions", "Mouse ID", "Genotype"],
+        columns=["Lipid Class"],
+        values=["Average Z Scores"],
+    )
+
     # Save the eliminated lipids and the normalized data with the Z Scores
-    with pd.ExcelWriter(output_path + "/output/Output file.xlsx", engine="openpyxl", mode="a") as writer:
-        df_save.to_excel(writer, sheet_name="Z Scores")
+    with pd.ExcelWriter(
+        output_path + "/output/Output file.xlsx", engine="openpyxl", mode="a", if_sheet_exists="overlay"
+    ) as writer:
+        try:
+            df_save.to_excel(writer, sheet_name="Z Scores", startrow=0, startcol=0)
+            df_save2.to_excel(writer, sheet_name="Z Scores", startrow=0, startcol=len(df_save.columns) + 1)
+            print("Saving to output file")
+        except PermissionError:
+            print("Close the Excel file and try again.")
 
     color_df(df_final, sheet="Z Scores", output_path=output_path)
-
-    print("Saving to output file")

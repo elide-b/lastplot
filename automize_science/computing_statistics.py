@@ -21,10 +21,10 @@ def statistics_tests(df_clean, control_name):
     for (region, lipid), data in df_clean.groupby(["Regions", "Lipids"]):
         control_group = data[data["Genotype"] == control_name]
         experimental_group = data[data["Genotype"] != control_name]
-        values = data["Normalized Values"]
+        values = data["Log10 Transformed"]
         shapiro_test = stats.shapiro(values)
-        control_data = control_group["Normalized Values"]
-        experimental_data = experimental_group["Normalized Values"]
+        control_data = control_group["Log10 Transformed"]
+        experimental_data = experimental_group["Log10 Transformed"]
         levene = stats.levene(control_data, experimental_data)
 
         shapiro_normality.append(shapiro_test.pvalue)
@@ -58,10 +58,10 @@ def z_scores(df_clean, statistics):
     print("Computing the Z scores and the average Z scores per lipid class")
 
     # Z Scores and average Z Scores per lipid class
-    grouped = df_clean.groupby(["Regions", "Lipids"])["Normalized Values"].agg(["mean", "std"]).reset_index()
+    grouped = df_clean.groupby(["Regions", "Lipids"])["Log10 Transformed"].agg(["mean", "std"]).reset_index()
     grouped.rename(columns={"mean": "Mean", "std": "STD"}, inplace=True)
     df_final = pd.merge(df_clean, grouped, on=["Regions", "Lipids"], how="left")
-    df_final["Z Scores"] = (df_final["Normalized Values"] - df_final["Mean"]) / df_final["STD"]
+    df_final["Z Scores"] = (df_final["Log10 Transformed"] - df_final["Mean"]) / df_final["STD"]
     average_z_scores = (
         df_final.groupby(["Regions", "Lipid Class", "Mouse ID"])["Z Scores"].mean().reset_index(name="Average Z Scores")
     )

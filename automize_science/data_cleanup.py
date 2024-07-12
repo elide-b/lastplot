@@ -109,13 +109,16 @@ def data_cleanup(df, df_mice, output_path):
 
     df_clean["Values"] = df_clean.apply(lambda row: replace_zero_values(row, df_clean), axis=1)
     log_values = np.log10(df_clean["Values"])
-    df_clean["Normalized Values"] = log_values
+    df_clean["Log10 Transformed"] = log_values
 
     if not os.path.exists(output_path + "/output"):
         os.makedirs(output_path + "/output")
 
     with pd.ExcelWriter(output_path + "/output/Output file.xlsx") as writer:
-        df_eliminated.to_excel(writer, sheet_name="Eliminated Lipids")
-    print("Saving data to new Excel file")
+        try:
+            df_eliminated.to_excel(writer, sheet_name="Eliminated Lipids")
+            print("Saving data to new Excel file")
+        except PermissionError:
+            print("Close the Excel file and try again.")
 
     return df_clean

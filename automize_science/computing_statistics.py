@@ -69,3 +69,29 @@ def z_scores(df_clean, statistics):
     df_final = pd.merge(df_final, statistics, on=["Regions", "Lipids"], how="left")
 
     return df_final
+
+
+def get_pvalue(test, control_values, experimental_values):
+    if any(value == "Mann Whitney" for value in test):
+        stat = "Mann Whitney"
+        statistics, pvalue = stats.mannwhitneyu(control_values, experimental_values)
+    elif any(value == "Welch T-Test" for value in test):
+        stat = "Welch T-Test"
+        statistics, pvalue = stats.ttest_ind(control_values, experimental_values, equal_var=False)
+    else:
+        stat = "T-Test"
+        statistics, pvalue = stats.ttest_ind(control_values, experimental_values)
+
+    return stat, pvalue
+
+
+def get_test(shapiro, levene):
+    test = []
+    if shapiro < 0.05 and levene < 0.05:
+        test.append("T-Test")
+    elif shapiro < 0.05 and levene > 0.05:
+        test.append("Welch T-Test")
+    else:
+        test.append("Mann Whitney")
+
+    return test

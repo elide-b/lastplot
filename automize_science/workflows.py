@@ -20,8 +20,5 @@ def data_workflow(file_path, data_sheet, mice_sheet, output_path, control_name):
     df_final = z_scores(df_clean=df_clean, statistics=statistics)
     save_values(df_final=df_final, output_path=output_path)
     save_zscores(df_final=df_final, output_path=output_path)
-    wb = load_workbook(output_path + "/output/Output file.xlsx")
-    wb.create_sheet(title="Comments")
-    wb.save(output_path + "/output/Output file.xlsx")
 
     return df_final

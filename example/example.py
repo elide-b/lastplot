@@ -16,4 +16,3 @@ df = lastplot.data_workflow(
     output_path="C:/Users/Elide/Documents/git/lastplot/example",
     control_name="WT",
 )
-

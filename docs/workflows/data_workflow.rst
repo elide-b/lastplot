@@ -1,12 +1,14 @@
 Data Workflow
 =============
 
-.. autofunction:: automize_science.data_workflow
+.. autofunction:: lastplot.data_workflow
 
 Description of data_workflow
 ============================
 
-The `data_workflow` function is designed to streamline the process of cleaning, analyzing, and normalizing lipid data.This workflow includes several key steps: data cleanup, statistical testing, and Z score computation. Below is a detailed explanation of each step and the overall workflow:
+The `data_workflow` function is designed to streamline the process of cleaning, analyzing, and normalizing lipid data.
+This workflow includes several key steps: data cleanup, statistical testing, and Z score computation.
+Below is a detailed explanation of each step and the overall workflow:
 
 Detailed Descriptions of Each Step
 ----------------------------------

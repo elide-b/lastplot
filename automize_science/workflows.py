@@ -1,6 +1,6 @@
-from automize_science.computing_statistics import *
-from automize_science.data_cleanup import *
-from automize_science.saving import *
+from lastplot.computing_statistics import *
+from lastplot.data_cleanup import *
+from lastplot.saving import *
 
 
 def data_workflow(file_path, data_sheet, mice_sheet, output_path, control_name):

@@ -6,7 +6,7 @@
 # -- Project information -----------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
-project = "Automize Science"
+project = "LastPlot"
 copyright = "2024, Elide Brunelli"
 author = "Elide Brunelli"
 release = "1.0.1"

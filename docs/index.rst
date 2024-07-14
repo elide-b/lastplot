@@ -1,4 +1,4 @@
-Welcome to Automize Science's documentation!
+Welcome to LastPlot's documentation!
 ============================================
 
 Indices and tables
@@ -11,12 +11,12 @@ Indices and tables
 What is it
 -----------
 
-Automize Science is a Python package designed to elaborate data into graphs coming from lipid extractions (LC/MS). Starting from a file containing the pmol/mg values per each sample, this package streamlines the process of data analysis and visualization.
+LastPlot is a Python package designed to elaborate data into graphs coming from lipid extractions (LC/MS). Starting from a file containing the pmol/mg values per each sample, this package streamlines the process of data analysis and visualization.
 
 Features
 --------
 
-Automize Science includes the following features:
+LastPlot includes the following features:
 
 - **Data Sanitization:** Clean and prepare data for analysis, removing internal standard samples and non-value samples.
 - **Data Normalization:** Normalize values with log10 to ensure consistency across samples.
@@ -32,27 +32,27 @@ You can install the package via pip:
 
 .. code-block:: bash
 
-    pip install automize_science
+    pip install lastplot
 
 Alternatively, you can install the package from the source:
 
 .. code-block:: bash
 
-    git clone https://github.com/elide-b/automize-science.git
-    cd automize-science
+    git clone https://github.com/elide-b/lastplot.git
+    cd lastplot
     pip install .
 
 Usage
 -----
 
-Here is one example of how to use Automize Science:
+Here is one example of how to use LastPlot:
 
 .. code-block:: python
 
-    import automize_science
+    import lastplot
 
     # Example usage
-    df = automize_science.data_workflow(
+    df = lastplot.data_workflow(
         file_path="My project.xlsx",
         data_sheet="Data Sheet",
         mice_sheet="Mice Sheet",
@@ -60,7 +60,7 @@ Here is one example of how to use Automize Science:
         control_name="CM",
     )
 
-    automize_science.zscore_graph_region(
+    lastplot.zscore_graph_region(
         df_final=df,
         control_name="CM",
         experimental_name="EM",
@@ -95,5 +95,4 @@ Distributed under the MIT License.
    :caption: Contents:
 
    workflows/data_workflow
-   graphs/z-scores/z_scores
-   graphs/values/values
+   graphs/graphs

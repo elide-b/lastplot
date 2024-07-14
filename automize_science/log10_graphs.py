@@ -4,10 +4,9 @@ import matplotlib.pyplot as plt
 import numpy as np
 import seaborn as sns
 import starbars
-
-from automize_science.computing_statistics import get_test
-from automize_science.graph_constructor import mpl_calc_series
-from automize_science.saving import save_sheet
+from lastplot.computing_statistics import get_test
+from lastplot.graph_constructor import mpl_calc_series
+from lastplot.saving import save_sheet
 
 __all__ = [
     "log_values_graph_lipid_class",

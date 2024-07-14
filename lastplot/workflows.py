@@ -7,7 +7,7 @@ def data_workflow(file_path, data_sheet, mice_sheet, output_path, control_name):
     """
     Automatically processes lipidomics data.
 
-    :param file_path: Path of the Excel file containing the data.
+    :param file_path: Path of the Excel file containing the data. The path should be written with right orientation slashes ->/
     :param data_sheet: Name of the sheet containing the data.
     :param mice_sheet: Name of the sheet containing the information about the subjects.
     :param output_path: Path of where to save the outputs.

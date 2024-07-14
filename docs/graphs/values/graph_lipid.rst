@@ -1,5 +1,5 @@
-Normalized values graphs per single lipid
-=========================================
+Log10 values graphs per single lipid
+====================================
 
 
-.. autofunction:: lastplot.values_graph_lipid
+.. autofunction:: lastplot.log_values_graph_lipid

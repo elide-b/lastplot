@@ -1,18 +1,17 @@
 import lastplot
 
-file_path = "Dementia project.xlsx"
-data_sheet = "Quantification"
-mice_sheet = "Sheet1"
-output_path = "C:/Users/Elide/Documents/git/lastplot/example"
-control_name = "WT"
-experimental_name = "FTLD"
-palette = "Set1"
-
-
 df = lastplot.data_workflow(
-    file_path="Dementia project.xlsx",
-    data_sheet="Quantification",
-    mice_sheet="Sheet1",
-    output_path="C:/Users/Elide/Documents/git/lastplot/example",
+    file_path="My project.xlsx",
+    data_sheet="Data Sheet",
+    mice_sheet="Mice Sheet",
+    output_path="C:/Users/[YOUR-USERNAME]/Documents/example",
     control_name="WT",
+)
+
+lastplot.log_values_graph_lipid_class(
+    df,
+    control_name="WT",
+    experimental_name="BT",
+    output_path="C:/Users/[YOUR-USERNAME]/Documents/example",
+    palette="Set1",
 )

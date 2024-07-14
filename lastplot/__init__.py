@@ -4,7 +4,8 @@ Starting from a file containing the **pmol/mg** values per each sample, this pac
 analysis and visualization.
 """
 
-from .graph_constructor import *
+from .log10_graphs import *
 from .workflows import data_workflow
+from .zscores_graphs import *
 
-__version__ = "1.0.2"
+__version__ = "1.0.0"

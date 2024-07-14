@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import seaborn as sns
 import starbars
+
 from lastplot.computing_statistics import get_test
 from lastplot.graph_constructor import mpl_calc_series
 from lastplot.saving import save_sheet

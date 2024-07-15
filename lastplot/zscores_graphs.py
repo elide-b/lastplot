@@ -5,7 +5,7 @@ import numpy as np
 import seaborn as sns
 import starbars
 
-from lastplot.computing_statistics import get_test
+from lastplot.computing_statistics import get_test, get_pvalue
 from lastplot.graph_constructor import mpl_calc_series
 from lastplot.saving import save_sheet
 
@@ -64,50 +64,55 @@ def zscore_graph_lipid(
 
     for (region, lipid), data in df_final.groupby(["Regions", "Lipids"]):
         print(f"Creating graph for {lipid} in {region}")
-        control_group = data[data["Genotype"] == control_name]
-        experimental_group = data[data["Genotype"] != control_name]
-        control_values = control_group["Z Scores"]
-        experimental_values = experimental_group["Z Scores"]
 
         fig, ax = plt.subplots()
+        genotype_data = list(data['Genotype'].unique())
+        genotype_data.remove(control_name)
+        genotype_data.insert(0, control_name)
+
+
         bar_width, positions = mpl_calc_series(
-            len(lipid), 2, group_width=group_width, bar_width=bar_width, bar_gap=bar_gap
+            len(lipid), len(genotype_data), group_width=group_width, bar_width=bar_width, bar_gap=bar_gap
         )
+        boxplot = []
 
-        # Create boxplots
-        bp1 = ax.boxplot(
-            control_values,
-            positions=[positions[0]],
-            widths=bar_width,
-            patch_artist=True,
-            boxprops=dict(facecolor=palette[0], color="k"),
-            medianprops=dict(color="k"),
-        )
-        bp2 = ax.boxplot(
-            experimental_values,
-            positions=[positions[1]],
-            widths=bar_width,
-            patch_artist=True,
-            boxprops=dict(facecolor=palette[1], color="k"),
-            medianprops=dict(color="k"),
-        )
+        for g, genotype in enumerate(genotype_data):
+            values = data[data["Genotype"] == genotype]["Z Scores"]
 
-        # Add scatterplot
-        ax.scatter(np.ones(len(control_values)) * positions[0], control_values, color="k", s=6, zorder=3)
-        ax.scatter(
-            np.ones(len(experimental_values)) * positions[1],
-            experimental_values,
-            color="k",
-            s=6,
-            zorder=3,
-        )
+            bp = ax.boxplot(
+                values,
+                positions=[g],
+                widths=bar_width,
+                patch_artist=True,
+                boxprops=dict(facecolor=palette[g], color="k"),
+                medianprops=dict(color="k"),
+            )
+
+            boxplot.append(bp['boxes'][0])
+
+            ax.scatter(
+                np.ones(len(values)) * g,
+                values,
+                color="k",
+                s=6,
+                zorder=3,
+                )
+
+
+        ax.set_xticks([*range(len(genotype_data))])
+        ax.set_xticklabels(genotype_data, rotation=90)
 
         # Add statistical annotation
-        pvalue, test = get_test(shapiro, levene)
-        pairs = [(control_name, experimental_name, pvalue)]
+        pairs = []
+        for element in genotype_data:
+            if element != control_name:
+                test = get_test(shapiro, levene)
+                stat, pvalue = get_pvalue(test, data[data['Genotype'] == control_name]["Z Scores"], data[data['Genotype'] == element]["Z Scores"])
+                pairs.append((control_name, element, pvalue))
         starbars.draw_annotation(pairs)
         comment = [f"For z scores of {lipid} in {region}, P-value is {pvalue}."]
         save_sheet(comment, "Comments", output_path)
+        ax.legend(boxplot, [control_name, *experimental_name], loc='center left', bbox_to_anchor=(1, 0.5))
 
         if xlabel:
             plt.xlabel(xlabel)
@@ -117,13 +122,14 @@ def zscore_graph_lipid(
             plt.ylabel(ylabel)
         else:
             plt.ylabel("Z Scores")
+
         if title:
             ax.set_title(title)
         else:
-            ax.title(f"Z Scores for {lipid} in {region}")
+            ax.set_title(f"Z Scores for {lipid} in {region}")
 
+        plt.tight_layout()
         plt.savefig(output_path + f"/output/zscore_graphs/lipid/Z Scores for {lipid} in {region}.png", dpi=1200)
-
         if show:
             plt.show()
         plt.close()
@@ -170,53 +176,40 @@ def zscore_graph_lipid_class(
             fig, ax = plt.subplots()
             data = region_data[region_data["Lipid Class"] == lipid_class]
             lipids = data["Lipids"].unique()
+            genotype_data = list(data['Genotype'].unique())
+            genotype_data.remove(control_name)
+            genotype_data.insert(0, control_name)
 
             bar_width, positions = mpl_calc_series(
-                len(lipids), 2, group_width=group_width, bar_width=bar_width, bar_gap=bar_gap
+                len(lipids), len(genotype_data), group_width=group_width, bar_width=bar_width, bar_gap=bar_gap
             )
-
+            boxplot = []
             for j, lipid in enumerate(lipids):
-                control_values = data[(data["Lipids"] == lipid) & (data["Genotype"] == control_name)]["Z Scores"]
-                experimental_values = data[(data["Lipids"] == lipid) & (data["Genotype"] == experimental_name)][
-                    "Z Scores"
-                ]
+                for g, genotype in enumerate(genotype_data):
+                    experimental_values = data[(data["Lipids"] == lipid) & (data["Genotype"] == genotype)]["Z Scores"]
 
-                # Create boxplots
-                ax.boxplot(
-                    control_values,
-                    positions=[positions[j][0]],
-                    widths=bar_width,
-                    patch_artist=True,
-                    boxprops=dict(facecolor=palette[0], color="k"),
-                    medianprops=dict(color="k"),
-                )
-                ax.boxplot(
-                    experimental_values,
-                    positions=[positions[j][1]],
-                    widths=bar_width,
-                    patch_artist=True,
-                    boxprops=dict(facecolor=palette[1], color="k"),
-                    medianprops=dict(color="k"),
-                )
+                    bp = ax.boxplot(
+                        experimental_values,
+                        positions=[positions[j][g]],
+                        widths=bar_width,
+                        patch_artist=True,
+                        boxprops=dict(facecolor=palette[g], color="k"),
+                        medianprops=dict(color="k"),
+                    )
 
-                # Add scatter points
-                ax.scatter(
-                    np.ones(len(control_values)) * positions[j][0],
-                    control_values,
-                    color="k",
-                    s=6,
-                    zorder=3,
-                )
-                ax.scatter(
-                    np.ones(len(experimental_values)) * positions[j][1],
-                    experimental_values,
-                    color="k",
-                    s=6,
-                    zorder=3,
-                )
+                    boxplot.append(bp['boxes'][0])
+
+                    ax.scatter(
+                        np.ones(len(experimental_values)) * positions[j][g],
+                        experimental_values,
+                        color="k",
+                        s=6,
+                        zorder=3,
+                        )
 
             ax.set_xticks([*range(len(lipids))])
             ax.set_xticklabels(lipids, rotation=90)
+            ax.legend(boxplot, [control_name, *experimental_name],loc='center left', bbox_to_anchor=(1, 0.5))
 
             if xlabel:
                 ax.set_xlabel(xlabel)

@@ -41,7 +41,7 @@ def log_values_graph_lipid(
 
     :param df_final: DataFrame containing normalized values and statistical test results.
     :param control_name: Name of the control group.
-    :param experimental_name: Name of the experimental group.
+    :param experimental_name: Name of the experimental group, as a list.
     :param output_path: Path to save output graphs.
     :param palette: Color palette for plotting.
     :param xlabel: Label for the x-axis. If None, defaults to "Genotype".
@@ -171,7 +171,7 @@ def log_values_graph_lipid_class(
 
     :param df_final: DataFrame containing normalized values and statistical test results.
     :param control_name: Name of the control group.
-    :param experimental_name: Name of the experimental group.
+    :param experimental_name: Name of the experimental group, as a list.
     :param output_path: Path to save output graphs.
     :param palette: Color palette for plotting.
     :param xlabel: Label for the x-axis. If None, defaults to "Lipid Class"
@@ -198,6 +198,9 @@ def log_values_graph_lipid_class(
             fig, ax = plt.subplots()
             data = region_data[region_data["Lipid Class"] == lipid_class]
             lipids = data["Lipids"].unique()
+            genotype_data = list(data['Genotype'].unique())
+            genotype_data.remove(control_name)
+            genotype_data.insert(0, control_name)
 
             if debug:
                 # Draw extra information to visualize the bar width calculations.
@@ -210,58 +213,41 @@ def log_values_graph_lipid_class(
                     ax=ax,
                 )
 
-            comp_bar_width, positions = mpl_calc_series(
+            width, positions = mpl_calc_series(
                 len(lipids),
-                2,
+                len(genotype_data),
                 group_width=group_width,
                 bar_width=bar_width,
                 bar_gap=bar_gap,
             )  # len(lipids) is the lenght of the ticks
 
+            boxplot = []
             for j, lipid in enumerate(lipids):
-                control_values = data[
-                    (data["Lipids"] == lipid) & (data["Genotype"] == control_name)
-                ]["Log10 Transformed"]
-                experimental_values = data[
-                    (data["Lipids"] == lipid) & (data["Genotype"] == experimental_name)
-                ]["Log10 Transformed"]
+                for g, genotype in enumerate(genotype_data):
+                    values = data[(data["Lipids"] == lipid) & (data["Genotype"] == genotype)]["Log10 Transformed"]
 
-                # Create boxplots
-                ax.boxplot(
-                    control_values,
-                    positions=[positions[j][0]],
-                    widths=comp_bar_width,
-                    patch_artist=True,
-                    boxprops=dict(facecolor=palette[0], color="k"),
-                    medianprops=dict(color="k"),
-                )
-                ax.boxplot(
-                    experimental_values,
-                    positions=[positions[j][1]],
-                    widths=comp_bar_width,
-                    patch_artist=True,
-                    boxprops=dict(facecolor=palette[1], color="k"),
-                    medianprops=dict(color="k"),
-                )
+                    bp = ax.boxplot(
+                        values,
+                        positions=[positions[j][g]],
+                        widths=bar_width,
+                        patch_artist=True,
+                        boxprops=dict(facecolor=palette[g], color="k"),
+                        medianprops=dict(color="k"),
+                    )
 
-                # Add scatter points
-                ax.scatter(
-                    np.ones(len(control_values)) * positions[j][0],
-                    control_values,
-                    color="k",
-                    s=6,
-                    zorder=3,
-                )
-                ax.scatter(
-                    np.ones(len(experimental_values)) * positions[j][1],
-                    experimental_values,
-                    color="k",
-                    s=6,
-                    zorder=3,
-                )
+                    boxplot.append(bp['boxes'][0])
+
+                    ax.scatter(
+                        np.ones(len(values)) * positions[j][g],
+                        values,
+                        color="k",
+                        s=6,
+                        zorder=3,
+                    )
 
             ax.set_xticks([*range(len(lipids))])
             ax.set_xticklabels(lipids, rotation=90)
+            ax.legend(boxplot, [control_name, *experimental_name], loc='center left', bbox_to_anchor=(1, 0.5))
 
             if xlabel:
                 ax.set_xlabel(xlabel)

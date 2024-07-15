@@ -2,7 +2,7 @@ import pandas as pd
 import scipy.stats as stats
 
 
-def statistics_tests(df_clean, control_name):
+def statistics_tests(df_clean, control_name, experimental_name):
     """
     Performs statistical tests on cleaned lipid data to check for normality and equality of variances.
 
@@ -20,13 +20,12 @@ def statistics_tests(df_clean, control_name):
     # Test for the normality of the residuals and for the equality of variances
     for (region, lipid), data in df_clean.groupby(["Regions", "Lipids"]):
         control_group = data[data["Genotype"] == control_name]
-        experimental_group = data[data["Genotype"] != control_name]
+        genotype_data = df_clean.groupby('Genotype')['Log10 Transformed'].apply(list)
         values = data["Log10 Transformed"]
         shapiro_test = stats.shapiro(values)
         control_data = control_group["Log10 Transformed"]
-        experimental_data = experimental_group["Log10 Transformed"]
-        levene = stats.levene(control_data, experimental_data)
-
+        for genotype in experimental_name:
+            levene = stats.levene(control_data, genotype_data[genotype])
         shapiro_normality.append(shapiro_test.pvalue)
         levene_equality.append(levene.pvalue)
         regions.append(region)
@@ -61,6 +60,7 @@ def z_scores(df_clean, statistics):
     grouped = df_clean.groupby(["Regions", "Lipids"])["Log10 Transformed"].agg(["mean", "std"]).reset_index()
     grouped.rename(columns={"mean": "Mean", "std": "STD"}, inplace=True)
     df_final = pd.merge(df_clean, grouped, on=["Regions", "Lipids"], how="left")
+    df_final.to_excel("test.xlsx")
     df_final["Z Scores"] = (df_final["Log10 Transformed"] - df_final["Mean"]) / df_final["STD"]
     average_z_scores = (
         df_final.groupby(["Regions", "Lipid Class", "Mouse ID"])["Z Scores"].mean().reset_index(name="Average Z Scores")
@@ -95,3 +95,4 @@ def get_test(shapiro, levene):
         test.append("Mann Whitney")
 
     return test
+

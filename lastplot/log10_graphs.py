@@ -6,7 +6,7 @@ import seaborn as sns
 import starbars
 
 from lastplot.computing_statistics import get_test, get_pvalue
-from lastplot.graph_constructor import mpl_calc_series
+from lastplot.graph_constructor import mpl_calc_series, mpl_debug_series
 from lastplot.saving import save_sheet
 
 __all__ = [
@@ -17,7 +17,15 @@ __all__ = [
 
 # Graphs by log10 values
 def log_values_graph_lipid(
-    df_final, control_name, experimental_name, output_path, palette, xlabel=None, ylabel=None, title=None, show=True
+    df_final,
+    control_name,
+    experimental_name,
+    output_path,
+    palette,
+    xlabel=None,
+    ylabel=None,
+    title=None,
+    show=True,
 ):
     """
     The `log_values_graph_lipid` function generates boxplots and statistical annotations to visualize the distribution of log 10 transformed values of single lipids across regions. It performs the following tasks:
@@ -43,7 +51,7 @@ def log_values_graph_lipid(
     """
 
     group_width = 0.4
-    bar_width = 0.
+    bar_width = 0.0
     bar_gap = 0.02
     palette = sns.color_palette(palette)
 
@@ -93,7 +101,13 @@ def log_values_graph_lipid(
         )
 
         # Add scatterplot
-        ax.scatter(np.ones(len(control_values)) * positions[0], control_values, color="k", s=6, zorder=3)
+        ax.scatter(
+            np.ones(len(control_values)) * positions[0],
+            control_values,
+            color="k",
+            s=6,
+            zorder=3,
+        )
         ax.scatter(
             np.ones(len(experimental_values)) * positions[1],
             experimental_values,
@@ -124,7 +138,8 @@ def log_values_graph_lipid(
             ax.set_title(f"Log10 Transformed Values for {lipid} in {region}")
 
         plt.savefig(
-            output_path + f"/output/log_value_graphs/lipid/Log10 Transformed Values for {lipid} in {region}.png",
+            output_path
+            + f"/output/log_value_graphs/lipid/Log10 Transformed Values for {lipid} in {region}.png",
             dpi=1200,
         )
         if show:
@@ -133,7 +148,16 @@ def log_values_graph_lipid(
 
 
 def log_values_graph_lipid_class(
-    df_final, control_name, experimental_name, output_path, palette, xlabel=None, ylabel=None, title=None, show=True
+    df_final,
+    control_name,
+    experimental_name,
+    output_path,
+    palette,
+    xlabel=None,
+    ylabel=None,
+    title=None,
+    show=True,
+    debug=False,
 ):
     """
     The `log_values_graph_lipid_class` function generates boxplots to visualize the distribution of log 10 transformed values across different lipid classes within each region. It performs the following tasks:
@@ -156,9 +180,9 @@ def log_values_graph_lipid_class(
     :param show: Whether to display plots interactively (default True).
     """
 
-    group_width = 0.5 # space a group will take (all expressed in percentages)
-    bar_width = 0.03 # width of one boxplot
-    bar_gap = 0.01 # space in between groups
+    group_width = 0.5  # space a group will take (all expressed in percentages)
+    bar_width = 0.03  # width of one boxplot
+    bar_gap = 0.01  # space in between groups
 
     palette = sns.color_palette(palette)
 
@@ -175,24 +199,38 @@ def log_values_graph_lipid_class(
             data = region_data[region_data["Lipid Class"] == lipid_class]
             lipids = data["Lipids"].unique()
 
-            bar_width, positions = mpl_calc_series(
-                len(lipids), 2, group_width=group_width, bar_width=bar_width, bar_gap=bar_gap
-            ) # len(lipids) is the lenght of the ticks
-            print("bar parameters", bar_gap, bar_width, group_width)
+            if debug:
+                # Draw extra information to visualize the bar width calculations.
+                mpl_debug_series(
+                    len(lipids),
+                    2,
+                    group_width=group_width,
+                    bar_width=bar_width,
+                    bar_gap=bar_gap,
+                    ax=ax,
+                )
+
+            comp_bar_width, positions = mpl_calc_series(
+                len(lipids),
+                2,
+                group_width=group_width,
+                bar_width=bar_width,
+                bar_gap=bar_gap,
+            )  # len(lipids) is the lenght of the ticks
 
             for j, lipid in enumerate(lipids):
-                control_values = data[(data["Lipids"] == lipid) & (data["Genotype"] == control_name)][
-                    "Log10 Transformed"
-                ]
-                experimental_values = data[(data["Lipids"] == lipid) & (data["Genotype"] == experimental_name)][
-                    "Log10 Transformed"
-                ]
+                control_values = data[
+                    (data["Lipids"] == lipid) & (data["Genotype"] == control_name)
+                ]["Log10 Transformed"]
+                experimental_values = data[
+                    (data["Lipids"] == lipid) & (data["Genotype"] == experimental_name)
+                ]["Log10 Transformed"]
 
                 # Create boxplots
                 ax.boxplot(
                     control_values,
                     positions=[positions[j][0]],
-                    widths=bar_width,
+                    widths=comp_bar_width,
                     patch_artist=True,
                     boxprops=dict(facecolor=palette[0], color="k"),
                     medianprops=dict(color="k"),
@@ -200,7 +238,7 @@ def log_values_graph_lipid_class(
                 ax.boxplot(
                     experimental_values,
                     positions=[positions[j][1]],
-                    widths=bar_width,
+                    widths=comp_bar_width,
                     patch_artist=True,
                     boxprops=dict(facecolor=palette[1], color="k"),
                     medianprops=dict(color="k"),

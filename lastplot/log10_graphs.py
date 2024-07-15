@@ -5,7 +5,7 @@ import numpy as np
 import seaborn as sns
 import starbars
 
-from lastplot.computing_statistics import get_test
+from lastplot.computing_statistics import get_test, get_pvalue
 from lastplot.graph_constructor import mpl_calc_series
 from lastplot.saving import save_sheet
 
@@ -43,7 +43,7 @@ def log_values_graph_lipid(
     """
 
     group_width = 0.4
-    bar_width = 0.04
+    bar_width = 0.
     bar_gap = 0.02
     palette = sns.color_palette(palette)
 
@@ -59,17 +59,22 @@ def log_values_graph_lipid(
     save_sheet(test_comment, "Comments", output_path)
 
     for (region, lipid), data in df_final.groupby(["Regions", "Lipids"]):
+        print(f"Creating graph for {lipid} in {region}")
         shapiro = data.iloc[0]["Shapiro Normality"]
         levene = data.iloc[0]["Levene Equality"]
         control_group = data[data["Genotype"] == control_name]
         experimental_group = data[data["Genotype"] != control_name]
         control_values = control_group["Log10 Transformed"]
         experimental_values = experimental_group["Log10 Transformed"]
+        experimental_settings = [control_name, experimental_name]
+        positions = [0, 1]
 
         fig, ax = plt.subplots()
-        bar_width, positions = mpl_calc_series(
-            len(lipid), 2, group_width=group_width, bar_width=bar_width, bar_gap=bar_gap
-        )
+
+        # bar_width, positions = mpl_calc_series(
+        #     len(experimental_settings), 2, group_width=group_width, bar_width=bar_width, bar_gap=bar_gap
+        # )
+
         bp1 = ax.boxplot(
             control_values,
             positions=[positions[0]],
@@ -98,8 +103,9 @@ def log_values_graph_lipid(
         )
 
         # Add statistical annotation
-        pvalue, test = get_test(shapiro, levene)
-        pairs = [(control_name, experimental_name, pvalue)]
+        test = get_test(shapiro, levene)
+        stat, pvalue = get_pvalue(test, control_values, experimental_values)
+        pairs = [(positions[0], positions[1], pvalue)]
         starbars.draw_annotation(pairs)
         comment = [f"For log10 values of {lipid} in {region}, P-value is {pvalue}."]
         save_sheet(comment, "Comments", output_path)
@@ -150,9 +156,10 @@ def log_values_graph_lipid_class(
     :param show: Whether to display plots interactively (default True).
     """
 
-    group_width = 0.4
-    bar_width = 0.04
-    bar_gap = 0.02
+    group_width = 0.5 # space a group will take (all expressed in percentages)
+    bar_width = 0.03 # width of one boxplot
+    bar_gap = 0.01 # space in between groups
+
     palette = sns.color_palette(palette)
 
     if not os.path.exists(output_path + "/output/log_value_graphs/lipid_class"):
@@ -170,7 +177,8 @@ def log_values_graph_lipid_class(
 
             bar_width, positions = mpl_calc_series(
                 len(lipids), 2, group_width=group_width, bar_width=bar_width, bar_gap=bar_gap
-            )
+            ) # len(lipids) is the lenght of the ticks
+            print("bar parameters", bar_gap, bar_width, group_width)
 
             for j, lipid in enumerate(lipids):
                 control_values = data[(data["Lipids"] == lipid) & (data["Genotype"] == control_name)][

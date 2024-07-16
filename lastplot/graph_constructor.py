@@ -1,4 +1,3 @@
-import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib.axes import Axes
 
@@ -45,7 +44,6 @@ def mpl_calc_bar_width(n_bars, group_width, gap):
 def mpl_debug_series(
     n_groups, n_bars, group_width, bar_width, bar_gap, ax: Axes, min_bar_gap=0.03
 ):
-    print("HUH?", bar_width, bar_gap)
     debug = f"Input: w{bar_width:.2f}, g{bar_gap:.2f};"
     bar_gap *= n_groups
     bar_width *= n_groups

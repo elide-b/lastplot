@@ -5,7 +5,6 @@ import pandas as pd
 
 
 def load_data(datapath, sheet_name, mice_sheet):
-
     print("Loading data from " + datapath)
     # Getting the values for the lipids
     df = pd.read_excel(datapath, sheet_name=sheet_name, header=2)
@@ -103,7 +102,7 @@ def data_cleanup(df, df_mice, output_path):
                 & (data["Regions"] == row["Regions"])
                 & (data["Genotype"] == row["Genotype"])
                 & (data["Values"] != 0)
-            ]
+                ]
             if not group_df.empty:
                 min_value = group_df["Values"].min()
                 if min_value != 0:
@@ -114,8 +113,7 @@ def data_cleanup(df, df_mice, output_path):
     df_clean["Values"] = df_clean.apply(
         lambda row: replace_zero_values(row, df_clean), axis=1
     )
-    log_values = np.log10(df_clean["Values"])
-    df_clean["Log10 Transformed"] = log_values
+    df_clean["Log10 Values"] = np.log10(df_clean["Values"])
 
     if not os.path.exists(output_path + "/output"):
         os.makedirs(output_path + "/output")

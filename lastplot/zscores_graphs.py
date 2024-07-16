@@ -6,7 +6,7 @@ import seaborn as sns
 import starbars
 
 from lastplot.computing_statistics import get_test, get_pvalue
-from lastplot.graph_constructor import mpl_calc_series
+from lastplot.graph_constructor import mpl_calc_series, mpl_debug_series
 from lastplot.saving import save_sheet
 
 __all__: [
@@ -17,15 +17,16 @@ __all__: [
 
 # Graphs by Z scores
 def zscore_graph_lipid(
-    df_final,
-    control_name,
-    experimental_name,
-    output_path,
-    palette,
-    xlabel=None,
-    ylabel=None,
-    title=None,
-    show=True,
+        df_final,
+        control_name,
+        experimental_name,
+        output_path,
+        palette,
+        xlabel=None,
+        ylabel=None,
+        title=None,
+        show=True,
+        debug=False
 ):
     """
     The `zscore_graph_lipid` function generates boxplots and statistical annotations for visualizing Z scores of lipids
@@ -78,13 +79,25 @@ def zscore_graph_lipid(
         genotype_data.remove(control_name)
         genotype_data.insert(0, control_name)
 
-        bar_width, positions = mpl_calc_series(
-            len(lipid),
+        if debug:
+            # Draw extra information to visualize the bar width calculations.
+            mpl_debug_series(
+                len(genotype_data),
+                1,
+                group_width=group_width,
+                bar_width=bar_width,
+                bar_gap=bar_gap,
+                ax=ax,
+            )
+
+        width, positions = mpl_calc_series(
             len(genotype_data),
+            1,
             group_width=group_width,
             bar_width=bar_width,
             bar_gap=bar_gap,
         )
+
         boxplot = []
 
         for g, genotype in enumerate(genotype_data):
@@ -93,7 +106,7 @@ def zscore_graph_lipid(
             bp = ax.boxplot(
                 values,
                 positions=[g],
-                widths=bar_width,
+                widths=width,
                 patch_artist=True,
                 boxprops=dict(facecolor=palette[g], color="k"),
                 medianprops=dict(color="k"),
@@ -159,15 +172,16 @@ def zscore_graph_lipid(
 
 
 def zscore_graph_lipid_class(
-    df_final,
-    control_name,
-    experimental_name,
-    output_path,
-    palette,
-    xlabel=None,
-    ylabel=None,
-    title=None,
-    show=True,
+        df_final,
+        control_name,
+        experimental_name,
+        output_path,
+        palette,
+        xlabel=None,
+        ylabel=None,
+        title=None,
+        show=True,
+        debug=False
 ):
     """
     The `zscore_graph_lipid_class` function generates boxplots to visualize the distribution of Z scores across different lipid classes within each region. It performs the following tasks:
@@ -211,19 +225,32 @@ def zscore_graph_lipid_class(
             genotype_data.remove(control_name)
             genotype_data.insert(0, control_name)
 
-            bar_width, positions = mpl_calc_series(
+            if debug:
+                # Draw extra information to visualize the bar width calculations.
+                mpl_debug_series(
+                    len(lipids),
+                    len(genotype_data),
+                    group_width=group_width,
+                    bar_width=bar_width,
+                    bar_gap=bar_gap,
+                    ax=ax,
+                )
+
+            width, positions = mpl_calc_series(
                 len(lipids),
                 len(genotype_data),
                 group_width=group_width,
                 bar_width=bar_width,
                 bar_gap=bar_gap,
             )
+
             boxplot = []
+
             for j, lipid in enumerate(lipids):
                 for g, genotype in enumerate(genotype_data):
                     experimental_values = data[
                         (data["Lipids"] == lipid) & (data["Genotype"] == genotype)
-                    ]["Z Scores"]
+                        ]["Z Scores"]
 
                     bp = ax.boxplot(
                         experimental_values,
@@ -268,7 +295,7 @@ def zscore_graph_lipid_class(
 
             plt.tight_layout()
             plt.savefig(
-                f"{output_path}/output/zscore_graphs/lipid_class/Z-Scores {region} {lipid_class}.png",
+                f"{output_path}/output/zscore_graphs/lipid_class/ZScores {region} {lipid_class}.png",
                 dpi=1200,
             )
             if show:

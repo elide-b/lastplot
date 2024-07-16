@@ -201,12 +201,13 @@ def log_values_graph_lipid_class(
         lipid_classes = region_data["Lipid Class"].unique()
 
         for i, lipid_class in enumerate(lipid_classes):
-            fig, ax = plt.subplots()
             data = region_data[region_data["Lipid Class"] == lipid_class]
             lipids = data["Lipids"].unique()
             genotype_data = list(data["Genotype"].unique())
             genotype_data.remove(control_name)
             genotype_data.insert(0, control_name)
+
+            fig, ax = plt.subplots(figsize=(max(2 * len(lipids), 5), 5))
 
             if debug:
                 # Draw extra information to visualize the bar width calculations.

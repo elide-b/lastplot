@@ -198,7 +198,7 @@ def log_values_graph_lipid_class(
             fig, ax = plt.subplots()
             data = region_data[region_data["Lipid Class"] == lipid_class]
             lipids = data["Lipids"].unique()
-            genotype_data = list(data['Genotype'].unique())
+            genotype_data = list(data["Genotype"].unique())
             genotype_data.remove(control_name)
             genotype_data.insert(0, control_name)
 
@@ -224,7 +224,9 @@ def log_values_graph_lipid_class(
             boxplot = []
             for j, lipid in enumerate(lipids):
                 for g, genotype in enumerate(genotype_data):
-                    values = data[(data["Lipids"] == lipid) & (data["Genotype"] == genotype)]["Log10 Transformed"]
+                    values = data[
+                        (data["Lipids"] == lipid) & (data["Genotype"] == genotype)
+                    ]["Log10 Transformed"]
 
                     bp = ax.boxplot(
                         values,
@@ -235,7 +237,7 @@ def log_values_graph_lipid_class(
                         medianprops=dict(color="k"),
                     )
 
-                    boxplot.append(bp['boxes'][0])
+                    boxplot.append(bp["boxes"][0])
 
                     ax.scatter(
                         np.ones(len(values)) * positions[j][g],
@@ -247,7 +249,12 @@ def log_values_graph_lipid_class(
 
             ax.set_xticks([*range(len(lipids))])
             ax.set_xticklabels(lipids, rotation=90)
-            ax.legend(boxplot, [control_name, *experimental_name], loc='center left', bbox_to_anchor=(1, 0.5))
+            ax.legend(
+                boxplot,
+                [control_name, *experimental_name],
+                loc="center left",
+                bbox_to_anchor=(1, 0.5),
+            )
 
             if xlabel:
                 ax.set_xlabel(xlabel)

@@ -15,12 +15,14 @@ def statistics_tests(df_clean, control_name, experimental_name):
     shapiro_normality = []
     levene_equality = []
 
-    print("Checking for the normality of the residuals and the equality of the variances")
+    print(
+        "Checking for the normality of the residuals and the equality of the variances"
+    )
 
     # Test for the normality of the residuals and for the equality of variances
     for (region, lipid), data in df_clean.groupby(["Regions", "Lipids"]):
         control_group = data[data["Genotype"] == control_name]
-        genotype_data = df_clean.groupby('Genotype')['Log10 Transformed'].apply(list)
+        genotype_data = df_clean.groupby("Genotype")["Log10 Transformed"].apply(list)
         values = data["Log10 Transformed"]
         shapiro_test = stats.shapiro(values)
         control_data = control_group["Log10 Transformed"]
@@ -57,15 +59,25 @@ def z_scores(df_clean, statistics):
     print("Computing the Z scores and the average Z scores per lipid class")
 
     # Z Scores and average Z Scores per lipid class
-    grouped = df_clean.groupby(["Regions", "Lipids"])["Log10 Transformed"].agg(["mean", "std"]).reset_index()
+    grouped = (
+        df_clean.groupby(["Regions", "Lipids"])["Log10 Transformed"]
+        .agg(["mean", "std"])
+        .reset_index()
+    )
     grouped.rename(columns={"mean": "Mean", "std": "STD"}, inplace=True)
     df_final = pd.merge(df_clean, grouped, on=["Regions", "Lipids"], how="left")
     df_final.to_excel("test.xlsx")
-    df_final["Z Scores"] = (df_final["Log10 Transformed"] - df_final["Mean"]) / df_final["STD"]
+    df_final["Z Scores"] = (
+        df_final["Log10 Transformed"] - df_final["Mean"]
+    ) / df_final["STD"]
     average_z_scores = (
-        df_final.groupby(["Regions", "Lipid Class", "Mouse ID"])["Z Scores"].mean().reset_index(name="Average Z Scores")
+        df_final.groupby(["Regions", "Lipid Class", "Mouse ID"])["Z Scores"]
+        .mean()
+        .reset_index(name="Average Z Scores")
     )
-    df_final = pd.merge(df_final, average_z_scores, on=["Lipid Class", "Regions", "Mouse ID"])
+    df_final = pd.merge(
+        df_final, average_z_scores, on=["Lipid Class", "Regions", "Mouse ID"]
+    )
     df_final = pd.merge(df_final, statistics, on=["Regions", "Lipids"], how="left")
 
     return df_final
@@ -77,7 +89,9 @@ def get_pvalue(test, control_values, experimental_values):
         statistics, pvalue = stats.mannwhitneyu(control_values, experimental_values)
     elif any(value == "Welch T-Test" for value in test):
         stat = "Welch T-Test"
-        statistics, pvalue = stats.ttest_ind(control_values, experimental_values, equal_var=False)
+        statistics, pvalue = stats.ttest_ind(
+            control_values, experimental_values, equal_var=False
+        )
     else:
         stat = "T-Test"
         statistics, pvalue = stats.ttest_ind(control_values, experimental_values)
@@ -95,4 +109,3 @@ def get_test(shapiro, levene):
         test.append("Mann Whitney")
 
     return test
-

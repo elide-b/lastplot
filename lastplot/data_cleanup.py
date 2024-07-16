@@ -75,7 +75,9 @@ def data_cleanup(df, df_mice, output_path):
 
     # Filter out lipids in the region where they have 3 values missing
     def filter_lipids(df):
-        lipid_zero_counts = df.groupby("Lipids")["Values"].apply(lambda x: (x == 0).sum())
+        lipid_zero_counts = df.groupby("Lipids")["Values"].apply(
+            lambda x: (x == 0).sum()
+        )
         valid_lipids = lipid_zero_counts[lipid_zero_counts < 3].index
         invalid_lipids = lipid_zero_counts[lipid_zero_counts >= 3].index
         valid_df = df[df["Lipids"].isin(valid_lipids)]
@@ -89,7 +91,9 @@ def data_cleanup(df, df_mice, output_path):
         df_clean = pd.concat([df_clean, valid_df])
         df_eliminated = pd.concat([df_eliminated, invalid_df])
 
-    print("Replacing the zero values with 80% of the minimum value for the corresponding group")
+    print(
+        "Replacing the zero values with 80% of the minimum value for the corresponding group"
+    )
 
     # Replace zero values with 80% of the minimum value for the corresponding group
     def replace_zero_values(row, data):
@@ -107,7 +111,9 @@ def data_cleanup(df, df_mice, output_path):
                     return new_value
         return row["Values"]
 
-    df_clean["Values"] = df_clean.apply(lambda row: replace_zero_values(row, df_clean), axis=1)
+    df_clean["Values"] = df_clean.apply(
+        lambda row: replace_zero_values(row, df_clean), axis=1
+    )
     log_values = np.log10(df_clean["Values"])
     df_clean["Log10 Transformed"] = log_values
 

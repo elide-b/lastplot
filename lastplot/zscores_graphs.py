@@ -17,7 +17,15 @@ __all__: [
 
 # Graphs by Z scores
 def zscore_graph_lipid(
-    df_final, control_name, experimental_name, output_path, palette, xlabel=None, ylabel=None, title=None, show=True
+    df_final,
+    control_name,
+    experimental_name,
+    output_path,
+    palette,
+    xlabel=None,
+    ylabel=None,
+    title=None,
+    show=True,
 ):
     """
     The `zscore_graph_lipid` function generates boxplots and statistical annotations for visualizing Z scores of lipids
@@ -66,13 +74,16 @@ def zscore_graph_lipid(
         print(f"Creating graph for {lipid} in {region}")
 
         fig, ax = plt.subplots()
-        genotype_data = list(data['Genotype'].unique())
+        genotype_data = list(data["Genotype"].unique())
         genotype_data.remove(control_name)
         genotype_data.insert(0, control_name)
 
-
         bar_width, positions = mpl_calc_series(
-            len(lipid), len(genotype_data), group_width=group_width, bar_width=bar_width, bar_gap=bar_gap
+            len(lipid),
+            len(genotype_data),
+            group_width=group_width,
+            bar_width=bar_width,
+            bar_gap=bar_gap,
         )
         boxplot = []
 
@@ -88,7 +99,7 @@ def zscore_graph_lipid(
                 medianprops=dict(color="k"),
             )
 
-            boxplot.append(bp['boxes'][0])
+            boxplot.append(bp["boxes"][0])
 
             ax.scatter(
                 np.ones(len(values)) * g,
@@ -96,8 +107,7 @@ def zscore_graph_lipid(
                 color="k",
                 s=6,
                 zorder=3,
-                )
-
+            )
 
         ax.set_xticks([*range(len(genotype_data))])
         ax.set_xticklabels(genotype_data, rotation=90)
@@ -107,12 +117,21 @@ def zscore_graph_lipid(
         for element in genotype_data:
             if element != control_name:
                 test = get_test(shapiro, levene)
-                stat, pvalue = get_pvalue(test, data[data['Genotype'] == control_name]["Z Scores"], data[data['Genotype'] == element]["Z Scores"])
+                stat, pvalue = get_pvalue(
+                    test,
+                    data[data["Genotype"] == control_name]["Z Scores"],
+                    data[data["Genotype"] == element]["Z Scores"],
+                )
                 pairs.append((control_name, element, pvalue))
         starbars.draw_annotation(pairs)
         comment = [f"For z scores of {lipid} in {region}, P-value is {pvalue}."]
         save_sheet(comment, "Comments", output_path)
-        ax.legend(boxplot, [control_name, *experimental_name], loc='center left', bbox_to_anchor=(1, 0.5))
+        ax.legend(
+            boxplot,
+            [control_name, *experimental_name],
+            loc="center left",
+            bbox_to_anchor=(1, 0.5),
+        )
 
         if xlabel:
             plt.xlabel(xlabel)
@@ -129,14 +148,26 @@ def zscore_graph_lipid(
             ax.set_title(f"Z Scores for {lipid} in {region}")
 
         plt.tight_layout()
-        plt.savefig(output_path + f"/output/zscore_graphs/lipid/Z Scores for {lipid} in {region}.png", dpi=1200)
+        plt.savefig(
+            output_path
+            + f"/output/zscore_graphs/lipid/Z Scores for {lipid} in {region}.png",
+            dpi=1200,
+        )
         if show:
             plt.show()
         plt.close()
 
 
 def zscore_graph_lipid_class(
-    df_final, control_name, experimental_name, output_path, palette, xlabel=None, ylabel=None, title=None, show=True
+    df_final,
+    control_name,
+    experimental_name,
+    output_path,
+    palette,
+    xlabel=None,
+    ylabel=None,
+    title=None,
+    show=True,
 ):
     """
     The `zscore_graph_lipid_class` function generates boxplots to visualize the distribution of Z scores across different lipid classes within each region. It performs the following tasks:
@@ -176,17 +207,23 @@ def zscore_graph_lipid_class(
             fig, ax = plt.subplots()
             data = region_data[region_data["Lipid Class"] == lipid_class]
             lipids = data["Lipids"].unique()
-            genotype_data = list(data['Genotype'].unique())
+            genotype_data = list(data["Genotype"].unique())
             genotype_data.remove(control_name)
             genotype_data.insert(0, control_name)
 
             bar_width, positions = mpl_calc_series(
-                len(lipids), len(genotype_data), group_width=group_width, bar_width=bar_width, bar_gap=bar_gap
+                len(lipids),
+                len(genotype_data),
+                group_width=group_width,
+                bar_width=bar_width,
+                bar_gap=bar_gap,
             )
             boxplot = []
             for j, lipid in enumerate(lipids):
                 for g, genotype in enumerate(genotype_data):
-                    experimental_values = data[(data["Lipids"] == lipid) & (data["Genotype"] == genotype)]["Z Scores"]
+                    experimental_values = data[
+                        (data["Lipids"] == lipid) & (data["Genotype"] == genotype)
+                    ]["Z Scores"]
 
                     bp = ax.boxplot(
                         experimental_values,
@@ -197,7 +234,7 @@ def zscore_graph_lipid_class(
                         medianprops=dict(color="k"),
                     )
 
-                    boxplot.append(bp['boxes'][0])
+                    boxplot.append(bp["boxes"][0])
 
                     ax.scatter(
                         np.ones(len(experimental_values)) * positions[j][g],
@@ -205,11 +242,16 @@ def zscore_graph_lipid_class(
                         color="k",
                         s=6,
                         zorder=3,
-                        )
+                    )
 
             ax.set_xticks([*range(len(lipids))])
             ax.set_xticklabels(lipids, rotation=90)
-            ax.legend(boxplot, [control_name, *experimental_name],loc='center left', bbox_to_anchor=(1, 0.5))
+            ax.legend(
+                boxplot,
+                [control_name, *experimental_name],
+                loc="center left",
+                bbox_to_anchor=(1, 0.5),
+            )
 
             if xlabel:
                 ax.set_xlabel(xlabel)

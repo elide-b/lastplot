@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import seaborn as sns
 import starbars
+from scipy import stats
 
 from lastplot.computing_statistics import get_test, get_pvalue
 from lastplot.graph_constructor import mpl_calc_series, mpl_debug_series
@@ -26,6 +27,7 @@ def log_values_graph_lipid(
         ylabel=None,
         title=None,
         show=True,
+        debug=False
 ):
     """
     The `log_values_graph_lipid` function generates boxplots and statistical annotations to visualize the distribution of log 10 transformed values of single lipids across regions. It performs the following tasks:
@@ -51,7 +53,7 @@ def log_values_graph_lipid(
     """
 
     group_width = 0.4
-    bar_width = 0.0
+    bar_width = 0.04
     bar_gap = 0.02
     palette = sns.color_palette(palette)
 
@@ -59,37 +61,41 @@ def log_values_graph_lipid(
         os.makedirs(output_path + "/output/log_value_graphs/lipid")
 
     for (region, lipid), data in df_final.groupby(["Regions", "Lipids"]):
-        shapiro = data.iloc[0]["Shapiro Normality"]
-        levene = data.iloc[0]["Levene Equality"]
-        test = get_test(shapiro, levene)
-
-    test_comment = [f"{test} will be performed for all of the lipids"]
-    save_sheet(test_comment, "Comments", output_path)
-
-    for (region, lipid), data in df_final.groupby(["Regions", "Lipids"]):
         print(f"Creating graph for {lipid} in {region}")
 
         fig, ax = plt.subplots()
-        genotype_data = list(data["Genotype"].unique())
-        genotype_data.remove(control_name)
-        genotype_data.insert(0, control_name)
+        genotype_labels = list(data["Genotype"].unique())
+        genotype_labels.remove(control_name)
+        genotype_labels.insert(0, control_name)
 
-        bar_width, positions = mpl_calc_series(
-            len(lipid),
-            len(genotype_data),
+        if debug:
+            # Draw extra information to visualize the bar width calculations.
+            mpl_debug_series(
+                len(genotype_labels),
+                1,
+                group_width=group_width,
+                bar_width=bar_width,
+                bar_gap=bar_gap,
+                ax=ax,
+            )
+
+        width, positions = mpl_calc_series(
+            len(genotype_labels),
+            1,
             group_width=group_width,
             bar_width=bar_width,
             bar_gap=bar_gap,
         )
+
         boxplot = []
 
-        for g, genotype in enumerate(genotype_data):
+        for g, genotype in enumerate(genotype_labels):
             values = data[data["Genotype"] == genotype]["Log10 Values"]
 
             bp = ax.boxplot(
                 values,
                 positions=[g],
-                widths=bar_width,
+                widths=width,
                 patch_artist=True,
                 boxprops=dict(facecolor=palette[g], color="k"),
                 medianprops=dict(color="k"),
@@ -105,22 +111,41 @@ def log_values_graph_lipid(
                 zorder=3,
             )
 
-        ax.set_xticks([*range(len(genotype_data))])
-        ax.set_xticklabels(genotype_data, rotation=90)
+        ax.set_xticks([*range(len(genotype_labels))])
+        ax.set_xticklabels(genotype_labels, rotation=90)
 
         # Add statistical annotation
         pairs = []
-        for element in genotype_data:
-            if element != control_name:
+        if len(genotype_labels) <= 2:
+            for element in genotype_labels:
+                shapiro = data.iloc[0]["Shapiro Normality"]
+                levene = data.iloc[0]["Levene Equality"]
                 test = get_test(shapiro, levene)
-                stat, pvalue = get_pvalue(
-                    test,
-                    data[data["Genotype"] == control_name]["Log10 Values"],
-                    data[data["Genotype"] == element]["Log10 Values"],
-                )
-                pairs.append((control_name, element, pvalue))
-        starbars.draw_annotation(pairs)
-        comment = [f"For log 10 values of {lipid} in {region}, P-value is {pvalue}."]
+
+                test_comment = [f"{test} will be performed for all of the lipids"]
+                save_sheet(test_comment, "Comments", output_path)
+
+                if element != control_name:
+                    stat, pvalue = get_pvalue(
+                        test,
+                        data[data["Genotype"] == control_name]["Log10 Values"],
+                        data[data["Genotype"] == element]["Log10 Values"],
+                    )
+                    pairs.append((control_name, element, pvalue))
+
+        else:
+            test_comment = ["Anova will be performed for all of the lipids"]
+            save_sheet(test_comment, "Comments", output_path)
+            stat, pvalue = stats.f_oneway(
+                *[data[data["Genotype"] == label]["Log10 Values"] for label in genotype_labels])
+            if pvalue < 0.05:
+                res = stats.tukey_hsd(*[data[data["Genotype"] == label]["Log10 Values"] for label in genotype_labels])
+                for (i, j), pair_value in np.ndenumerate(res.pvalue):
+                    if i != j and i < j:
+                        pairs.append((genotype_labels[i], genotype_labels[j], pair_value))
+
+        starbars.draw_annotation(pairs, ns_show=False)
+        comment = [f"For z scores of {lipid} in {region}, P-value is {pvalue}."]
         save_sheet(comment, "Comments", output_path)
 
         ax.legend(
@@ -148,6 +173,8 @@ def log_values_graph_lipid(
             + f"/output/log_value_graphs/lipid/Log10 Values for {lipid} in {region}.png",
             dpi=1200,
         )
+        plt.tight_layout()
+
         if show:
             plt.show()
         plt.close()
@@ -204,15 +231,15 @@ def log_values_graph_lipid_class(
             fig, ax = plt.subplots()
             data = region_data[region_data["Lipid Class"] == lipid_class]
             lipids = data["Lipids"].unique()
-            genotype_data = list(data["Genotype"].unique())
-            genotype_data.remove(control_name)
-            genotype_data.insert(0, control_name)
+            genotype_labels = list(data["Genotype"].unique())
+            genotype_labels.remove(control_name)
+            genotype_labels.insert(0, control_name)
 
             if debug:
                 # Draw extra information to visualize the bar width calculations.
                 mpl_debug_series(
                     len(lipids),
-                    len(genotype_data),
+                    len(genotype_labels),
                     group_width=group_width,
                     bar_width=bar_width,
                     bar_gap=bar_gap,
@@ -221,7 +248,7 @@ def log_values_graph_lipid_class(
 
             width, positions = mpl_calc_series(
                 len(lipids),
-                len(genotype_data),
+                len(genotype_labels),
                 group_width=group_width,
                 bar_width=bar_width,
                 bar_gap=bar_gap,
@@ -230,7 +257,7 @@ def log_values_graph_lipid_class(
             boxplot = []
 
             for j, lipid in enumerate(lipids):
-                for g, genotype in enumerate(genotype_data):
+                for g, genotype in enumerate(genotype_labels):
                     values = data[
                         (data["Lipids"] == lipid) & (data["Genotype"] == genotype)
                         ]["Log10 Values"]

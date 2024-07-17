@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import seaborn as sns
 import starbars
+from scipy import stats
 
 from lastplot.computing_statistics import get_test, get_pvalue
 from lastplot.graph_constructor import mpl_calc_series, mpl_debug_series
@@ -64,25 +65,17 @@ def zscore_graph_lipid(
         os.makedirs(output_path + "/output/zscore_graphs/lipid")
 
     for (region, lipid), data in df_final.groupby(["Regions", "Lipids"]):
-        shapiro = data.iloc[0]["Shapiro Normality"]
-        levene = data.iloc[0]["Levene Equality"]
-        test = get_test(shapiro, levene)
-
-    test_comment = [f"{test} will be performed for all of the lipids"]
-    save_sheet(test_comment, "Comments", output_path)
-
-    for (region, lipid), data in df_final.groupby(["Regions", "Lipids"]):
         print(f"Creating graph for {lipid} in {region}")
 
         fig, ax = plt.subplots()
-        genotype_data = list(data["Genotype"].unique())
-        genotype_data.remove(control_name)
-        genotype_data.insert(0, control_name)
+        genotype_labels = list(data["Genotype"].unique())
+        genotype_labels.remove(control_name)
+        genotype_labels.insert(0, control_name)
 
         if debug:
             # Draw extra information to visualize the bar width calculations.
             mpl_debug_series(
-                len(genotype_data),
+                len(genotype_labels),
                 1,
                 group_width=group_width,
                 bar_width=bar_width,
@@ -91,7 +84,7 @@ def zscore_graph_lipid(
             )
 
         width, positions = mpl_calc_series(
-            len(genotype_data),
+            len(genotype_labels),
             1,
             group_width=group_width,
             bar_width=bar_width,
@@ -100,7 +93,7 @@ def zscore_graph_lipid(
 
         boxplot = []
 
-        for g, genotype in enumerate(genotype_data):
+        for g, genotype in enumerate(genotype_labels):
             values = data[data["Genotype"] == genotype]["Z Scores"]
 
             bp = ax.boxplot(
@@ -122,23 +115,42 @@ def zscore_graph_lipid(
                 zorder=3,
             )
 
-        ax.set_xticks([*range(len(genotype_data))])
-        ax.set_xticklabels(genotype_data, rotation=90)
+        ax.set_xticks([*range(len(genotype_labels))])
+        ax.set_xticklabels(genotype_labels, rotation=90)
 
         # Add statistical annotation
         pairs = []
-        for element in genotype_data:
-            if element != control_name:
+        if len(genotype_labels) <= 2:
+            for element in genotype_labels:
+                shapiro = data.iloc[0]["Shapiro Normality"]
+                levene = data.iloc[0]["Levene Equality"]
                 test = get_test(shapiro, levene)
-                stat, pvalue = get_pvalue(
-                    test,
-                    data[data["Genotype"] == control_name]["Z Scores"],
-                    data[data["Genotype"] == element]["Z Scores"],
-                )
-                pairs.append((control_name, element, pvalue))
-        starbars.draw_annotation(pairs)
+
+                test_comment = [f"{test} will be performed for all of the lipids"]
+                save_sheet(test_comment, "Comments", output_path)
+
+                if element != control_name:
+                    stat, pvalue = get_pvalue(
+                        test,
+                        data[data["Genotype"] == control_name]["Z Scores"],
+                        data[data["Genotype"] == element]["Z Scores"],
+                    )
+                    pairs.append((control_name, element, pvalue))
+
+        else:
+            test_comment = ["Anova will be performed for all of the lipids"]
+            save_sheet(test_comment, "Comments", output_path)
+            stat, pvalue = stats.f_oneway(*[data[data["Genotype"] == label]["Z Scores"] for label in genotype_labels])
+            if pvalue < 0.05:
+                res = stats.tukey_hsd(*[data[data["Genotype"] == label]["Z Scores"] for label in genotype_labels])
+                for (i, j), pair_value in np.ndenumerate(res.pvalue):
+                    if i != j and i < j:
+                        pairs.append((genotype_labels[i], genotype_labels[j], pair_value))
+
+        starbars.draw_annotation(pairs, ns_show=False)
         comment = [f"For z scores of {lipid} in {region}, P-value is {pvalue}."]
         save_sheet(comment, "Comments", output_path)
+
         ax.legend(
             boxplot,
             [control_name, *experimental_name],

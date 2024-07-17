@@ -33,11 +33,16 @@ def zscore_graph_lipid(
     The `zscore_graph_lipid` function generates boxplots and statistical annotations for visualizing Z scores of lipids
     across regions. It performs the following tasks:
 
-    - Iterates through each region and lipid combination in the final DataFrame (`df_final`).
-    - Calculates Shapiro-Wilk and Levene's test results for normality and equality of variances.
     - Plots boxplots to visualize the distribution of Z scores, distinguishing between control and experimental groups.
-    - Retrieves statistical test results (`pvalue` and `test`) using a custom function (`get_test`).
+    - Perform appropriate statistical tests based on the number of genotype groups and annotate the graph with p-values.
+        - If there are two genotypes:
+            - Performs normality test (Shapiro-Wilk test) and homogeneity of variances test (Levene's test).
+            - Based on the results, choose the appropriate test (e.g., t-test, Welch t-test, or Mann-Whitney U test).
+        - If there are more than two genotypes:
+            - Perform ANOVA to determine if there are any statistically significant differences between the means of the groups.
+            - If ANOVA is significant, perform post-hoc Tukey HSD test to find which specific groups differ.
     - Annotates the plot with statistical significance indicators using `starbars.draw_annotation`.
+    - Customizable plots with appropriate labels and title for better visualization.
     - Saves each plot as a PNG file in the specified `output_path`.
     - Optionally displays the plot (`show=True`) and closes it after display.
 
@@ -53,7 +58,6 @@ def zscore_graph_lipid(
     :param ylabel: Label for the y-axis. If None, defaults to "Z Scores".
     :param title: Title for the plot. If None, defaults to "Z Scores for {lipid} in {region}".
     :param show: Whether to display plots interactively (default True).
-
     """
 
     group_width = 0.4

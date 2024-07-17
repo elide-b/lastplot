@@ -32,9 +32,15 @@ def log_values_graph_lipid(
     """
     The `log_values_graph_lipid` function generates boxplots and statistical annotations to visualize the distribution of log 10 transformed values of single lipids across regions. It performs the following tasks:
 
-    - Calculates Shapiro-Wilk and Levene's test results for normality and equality of variances.
-    - Adds statistical annotations to the boxplots using `starbars.draw_annotation`.
     - Plots boxplots to visualize the distribution of the values for each lipid, distinguishing between control and experimental groups.
+    - Perform appropriate statistical tests based on the number of genotype groups and annotate the graph with p-values.
+        - If there are two genotypes:
+            - Performs normality test (Shapiro-Wilk test) and homogeneity of variances test (Levene's test).
+            - Based on the results, choose the appropriate test (e.g., t-test, Welch t-test, or Mann-Whitney U test).
+        - If there are more than two genotypes:
+            - Perform ANOVA to determine if there are any statistically significant differences between the means of the groups.
+            - If ANOVA is significant, perform post-hoc Tukey HSD test to find which specific groups differ.
+    - Adds statistical annotations to the boxplots using `starbars.draw_annotation`.
     - Customizable plots with appropriate labels and title for better visualization.
     - Saves each plot as a PNG file in the specified `output_path`.
     - Optionally displays the plot (`show=True`).
@@ -48,7 +54,7 @@ def log_values_graph_lipid(
     :param palette: Color palette for plotting.
     :param xlabel: Label for the x-axis. If None, defaults to "Genotype".
     :param ylabel: Label for the y-axis. If None, defaults to "Log10 Values".
-    :param title: Title for the plot. If None, defaults to "Log10 Values Values for {lipid} in {region}"
+    :param title: Title for the plot. If None, defaults to "Log10 Values for {lipid} in {region}"
     :param show: Whether to display plots interactively (default True).
     """
 

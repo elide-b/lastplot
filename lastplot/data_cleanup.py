@@ -30,10 +30,10 @@ def data_cleanup(df, df_mice, output_path):
     """
 
     print("Cleaning data")
-    print("Removing the Internal Standard samples")
+
     # Eliminating the 'Internal Standard' samples
+    print("Removing the Internal Standard samples")
     df = df[df["Lipid Class"] != "Internal Standard"]
-    # TODO: omega 6 or 3 to remove (DPEA) from all (ask Alain)
 
     index = df.columns.tolist()
     subjects = []
@@ -125,4 +125,4 @@ def data_cleanup(df, df_mice, output_path):
     except PermissionError:
         print("Close the Excel file and try again.")
 
-    return df_clean
+    return df_clean, invalid_df

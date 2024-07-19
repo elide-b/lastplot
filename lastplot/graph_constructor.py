@@ -64,7 +64,6 @@ def mpl_debug_series(
         else:
             algorithm = "gapped"
     debug += f" Calc: w{bar_width:.2f}, g{bar_gap:.2f}, {algorithm};"
-    mpl_calc_series(n_groups, n_bars, group_width, bar_width, bar_gap)
     ax.axhline(0, linestyle="--", color="k")
     for x in range(n_groups):
         ax.axvline(x, color="gray", linewidth=0.5)

@@ -18,16 +18,16 @@ __all__: [
 
 # Graphs by Z scores
 def zscore_graph_lipid(
-        df_final,
-        control_name,
-        experimental_name,
-        output_path,
-        palette,
-        xlabel=None,
-        ylabel=None,
-        title=None,
-        show=True,
-        debug=False,
+    df_final,
+    control_name,
+    experimental_name,
+    output_path,
+    palette,
+    xlabel=None,
+    ylabel=None,
+    title=None,
+    show=True,
+    debug=False,
 ):
     """
     The `zscore_graph_lipid` function generates boxplots and statistical annotations for visualizing Z scores of lipids
@@ -200,16 +200,16 @@ def zscore_graph_lipid(
 
 
 def zscore_graph_lipid_class(
-        df_final,
-        control_name,
-        experimental_name,
-        output_path,
-        palette,
-        xlabel=None,
-        ylabel=None,
-        title=None,
-        show=True,
-        debug=False,
+    df_final,
+    control_name,
+    experimental_name,
+    output_path,
+    palette,
+    xlabel=None,
+    ylabel=None,
+    title=None,
+    show=True,
+    debug=False,
 ):
     """
     The `zscore_graph_lipid_class` function generates boxplots to visualize the distribution of Z scores across different lipid classes within each region. It performs the following tasks:
@@ -278,12 +278,12 @@ def zscore_graph_lipid_class(
                 for g, genotype in enumerate(genotype_data):
                     experimental_values = data[
                         (data["Lipids"] == lipid) & (data["Genotype"] == genotype)
-                        ]["Z Scores"]
+                    ]["Z Scores"]
 
                     bp = ax.boxplot(
                         experimental_values,
                         positions=[positions[j][g]],
-                        widths=bar_width,
+                        widths=width,
                         patch_artist=True,
                         boxprops=dict(facecolor=palette[g], color="k"),
                         medianprops=dict(color="k"),
@@ -333,16 +333,16 @@ def zscore_graph_lipid_class(
 
 
 def zscore_graph_class_average(
-        df_final,
-        control_name,
-        experimental_name,
-        output_path,
-        palette,
-        xlabel=None,
-        ylabel=None,
-        title=None,
-        show=True,
-        debug=False,
+    df_final,
+    control_name,
+    experimental_name,
+    output_path,
+    palette,
+    xlabel=None,
+    ylabel=None,
+    title=None,
+    show=True,
+    debug=False,
 ):
     """
     The `zscore_graph_class average` function generates boxplots and statistical annotations for visualizing average Z scores of lipids classes

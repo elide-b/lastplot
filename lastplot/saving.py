@@ -59,7 +59,7 @@ def save_values(df_final, output_path):
 def save_zscores(df_final, output_path):
     df_save = df_final.pivot_table(
         index=["Regions", "Mouse ID", "Genotype"],
-        columns=["Lipids"],
+        columns=["Lipids", "Lipid Class"],
         values=["Z Scores"],
     )
     df_save.reset_index(inplace=True)

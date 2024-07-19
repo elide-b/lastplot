@@ -18,16 +18,16 @@ __all__ = [
 
 # Graphs by log10 values
 def log_values_graph_lipid(
-        df_final,
-        control_name,
-        experimental_name,
-        output_path,
-        palette,
-        xlabel=None,
-        ylabel=None,
-        title=None,
-        show=True,
-        debug=False,
+    df_final,
+    control_name,
+    experimental_name,
+    output_path,
+    palette,
+    xlabel=None,
+    ylabel=None,
+    title=None,
+    show=True,
+    debug=False,
 ):
     """
     The `log_values_graph_lipid` function generates boxplots and statistical annotations to visualize the distribution of log 10 transformed values of single lipids across regions. It performs the following tasks:
@@ -198,16 +198,16 @@ def log_values_graph_lipid(
 
 
 def log_values_graph_lipid_class(
-        df_final,
-        control_name,
-        experimental_name,
-        output_path,
-        palette,
-        xlabel=None,
-        ylabel=None,
-        title=None,
-        show=True,
-        debug=False,
+    df_final,
+    control_name,
+    experimental_name,
+    output_path,
+    palette,
+    xlabel=None,
+    ylabel=None,
+    title=None,
+    show=True,
+    debug=False,
 ):
     """
     The `log_values_graph_lipid_class` function generates boxplots to visualize the distribution of log 10 transformed values across different lipid classes within each region. It performs the following tasks:
@@ -277,12 +277,12 @@ def log_values_graph_lipid_class(
                 for g, genotype in enumerate(genotype_labels):
                     values = data[
                         (data["Lipids"] == lipid) & (data["Genotype"] == genotype)
-                        ]["Log10 Values"]
+                    ]["Log10 Values"]
 
                     bp = ax.boxplot(
                         values,
                         positions=[positions[j][g]],
-                        widths=bar_width,
+                        widths=width,
                         patch_artist=True,
                         boxprops=dict(facecolor=palette[g], color="k"),
                         medianprops=dict(color="k"),
@@ -334,16 +334,16 @@ def log_values_graph_lipid_class(
 
 
 def log_values_graph_class_average(
-        df_final,
-        control_name,
-        experimental_name,
-        output_path,
-        palette,
-        xlabel=None,
-        ylabel=None,
-        title=None,
-        show=True,
-        debug=False,
+    df_final,
+    control_name,
+    experimental_name,
+    output_path,
+    palette,
+    xlabel=None,
+    ylabel=None,
+    title=None,
+    show=True,
+    debug=False,
 ):
     """
     The `log_values_graph_class_average average` function generates boxplots and statistical annotations for visualizing average log 10 values of lipids classes

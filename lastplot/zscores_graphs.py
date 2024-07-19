@@ -27,7 +27,7 @@ def zscore_graph_lipid(
         ylabel=None,
         title=None,
         show=True,
-        debug=False
+        debug=False,
 ):
     """
     The `zscore_graph_lipid` function generates boxplots and statistical annotations for visualizing Z scores of lipids
@@ -144,12 +144,24 @@ def zscore_graph_lipid(
         else:
             test_comment = ["Anova will be performed for all of the lipids"]
             save_sheet(test_comment, "Comments", output_path)
-            stat, pvalue = stats.f_oneway(*[data[data["Genotype"] == label]["Z Scores"] for label in genotype_labels])
+            stat, pvalue = stats.f_oneway(
+                *[
+                    data[data["Genotype"] == label]["Z Scores"]
+                    for label in genotype_labels
+                ]
+            )
             if pvalue < 0.05:
-                res = stats.tukey_hsd(*[data[data["Genotype"] == label]["Z Scores"] for label in genotype_labels])
+                res = stats.tukey_hsd(
+                    *[
+                        data[data["Genotype"] == label]["Z Scores"]
+                        for label in genotype_labels
+                    ]
+                )
                 for (i, j), pair_value in np.ndenumerate(res.pvalue):
                     if i != j and i < j:
-                        pairs.append((genotype_labels[i], genotype_labels[j], pair_value))
+                        pairs.append(
+                            (genotype_labels[i], genotype_labels[j], pair_value)
+                        )
 
         starbars.draw_annotation(pairs, ns_show=False)
         comment = [f"For z scores of {lipid} in {region}, P-value is {pvalue}."]
@@ -197,7 +209,7 @@ def zscore_graph_lipid_class(
         ylabel=None,
         title=None,
         show=True,
-        debug=False
+        debug=False,
 ):
     """
     The `zscore_graph_lipid_class` function generates boxplots to visualize the distribution of Z scores across different lipid classes within each region. It performs the following tasks:
@@ -330,7 +342,7 @@ def zscore_graph_class_average(
         ylabel=None,
         title=None,
         show=True,
-        debug=False
+        debug=False,
 ):
     """
     The `zscore_graph_class average` function generates boxplots and statistical annotations for visualizing average Z scores of lipids classes
@@ -363,13 +375,21 @@ def zscore_graph_class_average(
     :param show: Whether to display plots interactively (default True).
     """
 
-    group_width = 0.4
-    bar_width = 0.04
-    bar_gap = 0.02
+    group_width = 1
+    bar_width = 0.1
+    bar_gap = 0.01
     palette = sns.color_palette(palette)
 
     if not os.path.exists(output_path + "/output/zscore_graphs/class_average"):
         os.makedirs(output_path + "/output/zscore_graphs/class_average")
+
+    for (region, lipid), data in df_final.groupby(["Regions", "Lipid Class"]):
+        shapiro = data.iloc[0]["Shapiro Normality"]
+        levene = data.iloc[0]["Levene Equality"]
+        test = get_test(shapiro, levene)
+
+    test_comment = [f"{test} will be performed for all of the lipids"]
+    save_sheet(test_comment, "Comments", output_path)
 
     for (region, lipid), data in df_final.groupby(["Regions", "Lipid Class"]):
         print(f"Creating graph for {lipid} in {region}")
@@ -429,13 +449,8 @@ def zscore_graph_class_average(
         pairs = []
         if len(genotype_labels) <= 2:
             for element in genotype_labels:
-                shapiro = data.iloc[0]["Shapiro Normality"]
-                levene = data.iloc[0]["Levene Equality"]
-                test = get_test(shapiro, levene)
-
                 test_comment = [f"{test} will be performed for all of the lipids"]
                 save_sheet(test_comment, "Comments", output_path)
-
                 if element != control_name:
                     stat, pvalue = get_pvalue(
                         test,
@@ -448,13 +463,23 @@ def zscore_graph_class_average(
             test_comment = ["ANOVA test will be performed for all of the lipids"]
             save_sheet(test_comment, "Comments", output_path)
             stat, pvalue = stats.f_oneway(
-                *[data[data["Genotype"] == label]["Average Z Scores"] for label in genotype_labels])
+                *[
+                    data[data["Genotype"] == label]["Average Z Scores"]
+                    for label in genotype_labels
+                ]
+            )
             if pvalue < 0.05:
                 res = stats.tukey_hsd(
-                    *[data[data["Genotype"] == label]["Average Z Scores"] for label in genotype_labels])
+                    *[
+                        data[data["Genotype"] == label]["Average Z Scores"]
+                        for label in genotype_labels
+                    ]
+                )
                 for (i, j), pair_value in np.ndenumerate(res.pvalue):
                     if i != j and i < j:
-                        pairs.append((genotype_labels[i], genotype_labels[j], pair_value))
+                        pairs.append(
+                            (genotype_labels[i], genotype_labels[j], pair_value)
+                        )
 
         starbars.draw_annotation(pairs, ns_show=False)
         comment = [f"For average z scores of {lipid} in {region}, P-value is {pvalue}."]
@@ -463,7 +488,7 @@ def zscore_graph_class_average(
         ax.legend(
             boxplot,
             [control_name, *experimental_name],
-            loc="center left",
+            loc="upper left",
             bbox_to_anchor=(1, 0.5),
         )
 

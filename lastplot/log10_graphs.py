@@ -27,7 +27,7 @@ def log_values_graph_lipid(
         ylabel=None,
         title=None,
         show=True,
-        debug=False
+        debug=False,
 ):
     """
     The `log_values_graph_lipid` function generates boxplots and statistical annotations to visualize the distribution of log 10 transformed values of single lipids across regions. It performs the following tasks:
@@ -143,12 +143,23 @@ def log_values_graph_lipid(
             test_comment = ["Anova will be performed for all of the lipids"]
             save_sheet(test_comment, "Comments", output_path)
             stat, pvalue = stats.f_oneway(
-                *[data[data["Genotype"] == label]["Log10 Values"] for label in genotype_labels])
+                *[
+                    data[data["Genotype"] == label]["Log10 Values"]
+                    for label in genotype_labels
+                ]
+            )
             if pvalue < 0.05:
-                res = stats.tukey_hsd(*[data[data["Genotype"] == label]["Log10 Values"] for label in genotype_labels])
+                res = stats.tukey_hsd(
+                    *[
+                        data[data["Genotype"] == label]["Log10 Values"]
+                        for label in genotype_labels
+                    ]
+                )
                 for (i, j), pair_value in np.ndenumerate(res.pvalue):
                     if i != j and i < j:
-                        pairs.append((genotype_labels[i], genotype_labels[j], pair_value))
+                        pairs.append(
+                            (genotype_labels[i], genotype_labels[j], pair_value)
+                        )
 
         starbars.draw_annotation(pairs, ns_show=False)
         comment = [f"For z scores of {lipid} in {region}, P-value is {pvalue}."]
@@ -332,7 +343,7 @@ def log_values_graph_class_average(
         ylabel=None,
         title=None,
         show=True,
-        debug=False
+        debug=False,
 ):
     """
     The `log_values_graph_class_average average` function generates boxplots and statistical annotations for visualizing average log 10 values of lipids classes
@@ -365,13 +376,18 @@ def log_values_graph_class_average(
     :param show: Whether to display plots interactively (default True).
     """
 
-    group_width = 0.4
-    bar_width = 0.04
-    bar_gap = 0.02
+    group_width = 1
+    bar_width = 0.1
+    bar_gap = 0.01
     palette = sns.color_palette(palette)
 
     if not os.path.exists(output_path + "/output/log_values/class_average"):
         os.makedirs(output_path + "/output/log_values/class_average")
+
+    for (region, lipid), data in df_final.groupby(["Regions", "Lipid Class"]):
+        shapiro = data.iloc[0]["Shapiro Normality"]
+        levene = data.iloc[0]["Levene Equality"]
+        test = get_test(shapiro, levene)
 
     for (region, lipid), data in df_final.groupby(["Regions", "Lipid Class"]):
         print(f"Creating graph for {lipid} in {region}")
@@ -450,16 +466,28 @@ def log_values_graph_class_average(
             test_comment = ["ANOVA test will be performed for all of the lipids"]
             save_sheet(test_comment, "Comments", output_path)
             stat, pvalue = stats.f_oneway(
-                *[data[data["Genotype"] == label]["Average Log10 Values"] for label in genotype_labels])
+                *[
+                    data[data["Genotype"] == label]["Average Log10 Values"]
+                    for label in genotype_labels
+                ]
+            )
             if pvalue < 0.05:
                 res = stats.tukey_hsd(
-                    *[data[data["Genotype"] == label]["Average Log10 Values"] for label in genotype_labels])
+                    *[
+                        data[data["Genotype"] == label]["Average Log10 Values"]
+                        for label in genotype_labels
+                    ]
+                )
                 for (i, j), pair_value in np.ndenumerate(res.pvalue):
                     if i != j and i < j:
-                        pairs.append((genotype_labels[i], genotype_labels[j], pair_value))
+                        pairs.append(
+                            (genotype_labels[i], genotype_labels[j], pair_value)
+                        )
 
         starbars.draw_annotation(pairs, ns_show=False)
-        comment = [f"For average log 10 values of {lipid} in {region}, P-value is {pvalue}."]
+        comment = [
+            f"For average log 10 values of {lipid} in {region}, P-value is {pvalue}."
+        ]
         save_sheet(comment, "Comments", output_path)
 
         ax.legend(

@@ -130,6 +130,8 @@ def lipid_selection(df_final, invalid_df, control_name, output_path):
     unique_lipids = df_final["Lipids"].unique()
     unique_invalid = invalid_df["Lipids"].unique()
     common_values = set(unique_lipids).intersection(set(unique_invalid))
+    common_values.add("DPA (n-6)")
+    common_values.add("DPA (n-3)")
     genotype_names = list(df_final["Genotype"].unique())
     genotype_data = df_final.groupby(["Genotype"])["Average Z Scores"].apply(list)
     pvalue_without = []

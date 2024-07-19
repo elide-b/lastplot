@@ -4,7 +4,7 @@ from lastplot.saving import *
 
 
 def data_workflow(
-    file_path, data_sheet, mice_sheet, output_path, control_name, experimental_name
+        file_path, data_sheet, mice_sheet, output_path, control_name, experimental_name
 ):
     """
     Automatically processes lipidomics data.
@@ -20,13 +20,16 @@ def data_workflow(
     df, df_mice = load_data(
         datapath=file_path, sheet_name=data_sheet, mice_sheet=mice_sheet
     )
-    df_clean, _ = data_cleanup(df=df, df_mice=df_mice, output_path=output_path)
+    df_clean, invalid_df = data_cleanup(df=df, df_mice=df_mice, output_path=output_path)
     statistics = statistics_tests(
         df_clean=df_clean,
         control_name=control_name,
         experimental_name=experimental_name,
     )
-    df_final = z_scores(df_clean=df_clean, statistics=statistics)
+    df_mid = z_scores(df_clean=df_clean, statistics=statistics)
+    df_final, df_compare = lipid_selection(
+        df_mid, invalid_df=invalid_df, control_name=control_name
+    )
     save_values(df_final=df_final, output_path=output_path)
     save_zscores(df_final=df_final, output_path=output_path)
 

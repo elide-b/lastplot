@@ -119,9 +119,9 @@ def data_cleanup(df, df_mice, output_path):
         os.makedirs(output_path + "/output")
 
     try:
-        with pd.ExcelWriter(output_path + "/output/Output file.xlsx") as writer:
-            df_eliminated.to_excel(writer, sheet_name="Eliminated Lipids")
-            print("Saving data to new Excel file")
+        with pd.ExcelWriter(
+                output_path + "/output/Output file.xlsx", engine="openpyxl", mode="a"
+        ) as writer:
     except PermissionError:
         print("Close the Excel file and try again.")
 

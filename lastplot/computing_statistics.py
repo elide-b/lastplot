@@ -124,7 +124,7 @@ def z_scores(df_clean, statistics):
     return df_final
 
 
-def lipid_selection(df_final, invalid_df, control_name, experimental_name):
+def lipid_selection(df_final, invalid_df, control_name):
     unique_lipids = df_final["Lipids"].unique()
     unique_invalid = invalid_df["Lipids"].unique()
     common_values = set(unique_lipids).intersection(set(unique_invalid))
@@ -174,7 +174,7 @@ def lipid_selection(df_final, invalid_df, control_name, experimental_name):
                     regions_with.append(region)
                     lipids_with.append(lipid)
 
-    # Creating a new dataframe to compare the impact of removing a lipid from all regions
+    # Creating a new dataframe to compare the impact of removing a lipid from all regions based on whether or not it would give the same interpretation
     df_without = pd.DataFrame(
         {
             "Regions": regions_without,
@@ -190,9 +190,9 @@ def lipid_selection(df_final, invalid_df, control_name, experimental_name):
     df_compare = pd.merge(df_with, df_without, on=["Lipids", "Regions"])
 
     for lipid in df_compare:
-        if any(df_compare["Pvalue Without"] != df_compare["Pvalue With"]):
+        if any(df_compare["Pvalue With"] != df_compare["Pvalue Without"]):
             pass
         else:
-            df_compare = df_compare[df_compare["Lipids"] != lipid]
+            df_final = df_final[df_final["Lipids"] != lipid]
 
-    return df_compare
+    return df_final, df_compare

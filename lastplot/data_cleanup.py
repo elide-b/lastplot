@@ -102,7 +102,7 @@ def data_cleanup(df, df_mice, output_path):
                 & (data["Regions"] == row["Regions"])
                 & (data["Genotype"] == row["Genotype"])
                 & (data["Values"] != 0)
-                ]
+            ]
             if not group_df.empty:
                 min_value = group_df["Values"].min()
                 if min_value != 0:
@@ -119,9 +119,9 @@ def data_cleanup(df, df_mice, output_path):
         os.makedirs(output_path + "/output")
 
     try:
-        with pd.ExcelWriter(
-                output_path + "/output/Output file.xlsx", engine="openpyxl", mode="a"
-        ) as writer:
+        with pd.ExcelWriter(output_path + "/output/Output file.xlsx") as writer:
+            df_eliminated.to_excel(writer, sheet_name="Eliminated Lipids")
+            print("Saving data to new Excel file")
     except PermissionError:
         print("Close the Excel file and try again.")
 

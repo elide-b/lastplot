@@ -13,6 +13,7 @@ from lastplot.saving import save_sheet
 __all__: [
     "zscore_graph_lipid_class",
     "zscore_graph_lipid",
+    "zscore_graph_class_average",
 ]
 
 
@@ -105,7 +106,7 @@ def zscore_graph_lipid(
                 positions=[g],
                 widths=width,
                 patch_artist=True,
-                boxprops=dict(facecolor=palette[g], color="k"),
+                boxprops=dict(facecolor=palette[g], color="k", alpha=0.8),
                 medianprops=dict(color="k"),
             )
 
@@ -283,9 +284,9 @@ def zscore_graph_lipid_class(
                     bp = ax.boxplot(
                         experimental_values,
                         positions=[positions[j][g]],
-                        widths=bar_width,
+                        widths=width,
                         patch_artist=True,
-                        boxprops=dict(facecolor=palette[g], color="k"),
+                        boxprops=dict(facecolor=palette[g], color="k", alpha=0.8),
                         medianprops=dict(color="k"),
                     )
 
@@ -428,7 +429,7 @@ def zscore_graph_class_average(
                 positions=[g],
                 widths=width,
                 patch_artist=True,
-                boxprops=dict(facecolor=palette[g], color="k"),
+                boxprops=dict(facecolor=palette[g], color="k", alpha=0.8),
                 medianprops=dict(color="k"),
             )
 

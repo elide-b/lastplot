@@ -118,10 +118,11 @@ def data_cleanup(df, df_mice, output_path):
     if not os.path.exists(output_path + "/output"):
         os.makedirs(output_path + "/output")
 
+    # Save the eliminated lipids and the normalized data with the Z Scores
     try:
-        with pd.ExcelWriter(
-                output_path + "/output/Output file.xlsx", engine="openpyxl", mode="a"
-        ) as writer:
+        with pd.ExcelWriter(output_path + "/output/Output file.xlsx") as writer:
+            df_eliminated.to_excel(writer, sheet_name="Removed lipids")
+            print("Saving data to new Excel file")
     except PermissionError:
         print("Close the Excel file and try again.")
 

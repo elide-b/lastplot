@@ -1,6 +1,8 @@
 import pandas as pd
 import scipy.stats as stats
 
+from lastplot.saving import save_sheet
+
 
 def get_pvalue(test, control_values, experimental_values):
     if any(value == "Mann Whitney" for value in test):
@@ -124,7 +126,7 @@ def z_scores(df_clean, statistics):
     return df_final
 
 
-def lipid_selection(df_final, invalid_df, control_name):
+def lipid_selection(df_final, invalid_df, control_name, output_path):
     unique_lipids = df_final["Lipids"].unique()
     unique_invalid = invalid_df["Lipids"].unique()
     common_values = set(unique_lipids).intersection(set(unique_invalid))
@@ -194,5 +196,9 @@ def lipid_selection(df_final, invalid_df, control_name):
             pass
         else:
             df_final = df_final[df_final["Lipids"] != lipid]
+            comment = [
+                f"{lipid} removed from all regions based on the fact it would give the same interpretation"
+            ]
+            save_sheet(comment, sheet_name="Removed Lipids", output_path=output_path)
 
     return df_final, df_compare

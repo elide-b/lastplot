@@ -28,7 +28,10 @@ def data_workflow(
     )
     df_mid = z_scores(df_clean=df_clean, statistics=statistics)
     df_final, df_compare = lipid_selection(
-        df_mid, invalid_df=invalid_df, control_name=control_name
+        df_mid,
+        invalid_df=invalid_df,
+        control_name=control_name,
+        output_path=output_path,
     )
     save_values(df_final=df_final, output_path=output_path)
     save_zscores(df_final=df_final, output_path=output_path)

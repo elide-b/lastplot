@@ -90,6 +90,14 @@ def statistics_tests(df_clean, control_name, experimental_name):
 
 
 def z_scores(df_clean, statistics):
+    """
+    Computes Z scores and average Z scores per lipid class, merging them into the final DataFrame.
+
+    Steps:
+    1. Groups the cleaned DataFrame by regions and lipids to calculate mean and standard deviation of log10 log_values.
+    2. Computes the Z scores for each lipid based on the mean and standard deviation.
+    3. Calculates average Z scores per lipid class, region, and mouse ID.
+    """
     print("Computing the Z scores and the average Z scores per lipid class")
 
     # Z Scores and average Z Scores per lipid class
@@ -127,6 +135,20 @@ def z_scores(df_clean, statistics):
 
 
 def lipid_selection(df_final, invalid_df, control_name, output_path):
+    """
+    Analyzes and filters lipids with missing log_values in some regions based on their statistical impact
+    on the Z score of the lipid class across different regions. Removes lipids
+    that do not change the interpretation of results.
+
+    The function performs the following steps:
+    1. Identifies the lipids with missing log_values in some regions.
+    2. Groups data by lipid class and calculates average Z scores.
+    3. Computes p-log_values of average Z scores with and without specific lipids using appropriate statistical tests.
+    4. Compares the impact of removing each lipid and filters out lipids that do not change the interpretation in all regions.
+
+    The Shapiro-Wilk and Levene tests are used for normality and variance equality assessments.
+    """
+
     unique_lipids = df_final["Lipids"].unique()
     unique_invalid = invalid_df["Lipids"].unique()
     common_values = set(unique_lipids).intersection(set(unique_invalid))
@@ -140,6 +162,9 @@ def lipid_selection(df_final, invalid_df, control_name, output_path):
     lipids_without = []
     regions_with = []
     lipids_with = []
+    print(
+        "Removing a lipid from all regions based on whether or not it would give the same interpretation."
+    )
 
     # Calculating the pvalues of Average Z Scores without the lipids
     for lipid in common_values:
@@ -178,7 +203,7 @@ def lipid_selection(df_final, invalid_df, control_name, output_path):
                     regions_with.append(region)
                     lipids_with.append(lipid)
 
-    # Creating a new dataframe to compare the impact of removing a lipid from all regions based on whether or not it would give the same interpretation
+    # Removing a lipid from all regions based on whether or not it would give the same interpretation
     df_without = pd.DataFrame(
         {
             "Regions": regions_without,

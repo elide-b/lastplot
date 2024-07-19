@@ -6,8 +6,10 @@ Graphs
 
    z-scores/graph_lipid
    z-scores/graph_class
-   values/graph_lipid
-   values/graph_class
+   z-scores/graph_class_average
+   log_values/graph_lipid
+   log_values/graph_class
+   log_values/graph_class_average
 
 
 Description

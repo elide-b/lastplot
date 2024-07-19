@@ -46,17 +46,18 @@ import lastplot
 df = lastplot.data_workflow(
     file_path="My project.xlsx",
     data_sheet="Data Sheet",
-    mice_sheet="Mice Sheet",
+    mice_sheet="Mice ID Sheet",
     output_path="C:/Users/[YOUR-USERNAME]/Documents/example",
     control_name="WT",
+    experimental_name=["FTD", "BPD", "HFD"]
 )
 
 lastplot.zscore_graph_lipid(
     df_final=df,
     control_name="WT",
-    experimental_name="EN",
+    experimental_name=["FTD", "BPD", "HFD"]
     output_path="C:/Users/[YOUR-USERNAME]/Documents/example",
-    palette="Set2",
+    palette="tab20b_r",
     show=True,
 )
 ```

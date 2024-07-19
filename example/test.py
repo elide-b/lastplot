@@ -4,16 +4,16 @@ df = lastplot.data_workflow(
     file_path="Dementia project.xlsx",
     data_sheet="Quantification",
     mice_sheet="Sheet1",
-    output_path="./example",
+    output_path=".",
     control_name="WT",
     experimental_name=["FTLD"],
 )
 
-lastplot.log_values_graph_lipid_class(
+lastplot.zscore_graph_class_average(
     df,
     control_name="WT",
     experimental_name=["FTLD"],
-    output_path="./example",
-    palette="Set3",
-    show=False,
+    output_path=".",
+    palette="tab20b_r",
+    show=True,
 )

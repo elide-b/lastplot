@@ -1,9 +1,11 @@
 import numpy as np
 from matplotlib.axes import Axes
 
+MIN_BAR_GAP = 0.005
+
 
 def mpl_calc_series(
-    n_groups, n_bars, group_width, bar_width, bar_gap, min_bar_gap=0.01
+    n_groups, n_bars, group_width, bar_width, bar_gap, min_bar_gap=MIN_BAR_GAP
 ):
     # IMPORTANT: This algorithm only produces correct bar widths when the
     # figure's width is determined exclusively by the n_groups given.
@@ -42,7 +44,7 @@ def mpl_calc_bar_width(n_bars, group_width, gap):
 
 
 def mpl_debug_series(
-    n_groups, n_bars, group_width, bar_width, bar_gap, ax: Axes, min_bar_gap=0.03
+    n_groups, n_bars, group_width, bar_width, bar_gap, ax: Axes, min_bar_gap=MIN_BAR_GAP
 ):
     debug = f"Input: w{bar_width:.2f}, g{bar_gap:.2f};"
     bar_gap *= n_groups

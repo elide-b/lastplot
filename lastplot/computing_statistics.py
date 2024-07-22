@@ -184,9 +184,7 @@ def lipid_selection(df_final, invalid_df, control_name, output_path):
                 if genotype != control_name:
                     levene_without = stats.levene(control_data, genotype_data[genotype])
                     test = get_test(shapiro_without.pvalue, levene_without.pvalue)
-                    stat, pvalue = get_pvalue(
-                        test, control_data, genotype_data[genotype]
-                    )
+                    pvalue = get_pvalue(test, control_data, genotype_data[genotype])
                     pwithout = pvalue_to_asterisks(pvalue)
                     pvalue_without.append(pwithout)
                     regions_without.append(region)
@@ -202,9 +200,7 @@ def lipid_selection(df_final, invalid_df, control_name, output_path):
                 if genotype != control_name:
                     levene_with = stats.levene(control_data, genotype_data[genotype])
                     test = get_test(shapiro_with.pvalue, levene_with.pvalue)
-                    stat, pvalue = get_pvalue(
-                        test, control_data, genotype_data[genotype]
-                    )
+                    pvalue = get_pvalue(test, control_data, genotype_data[genotype])
                     pwith = pvalue_to_asterisks(pvalue)
                     pvalue_with.append(pwith)
                     regions_with.append(region)

@@ -181,14 +181,14 @@ def zscore_graph_lipid(
 
         if xlabel:
             xlabel_format = xlabel.format(lipid=lipid, region=region)
-            ax.xlabel(xlabel_format)
+            ax.set_xlabel(xlabel_format)
         else:
-            ax.xlabel("Genotype")
+            ax.set_xlabel("Genotype")
         if ylabel:
             ylabel_format = ylabel.format(lipid=lipid, region=region)
-            ax.ylabel(ylabel_format)
+            ax.set_ylabel(ylabel_format)
         else:
-            plt.ylabel("Z Scores")
+            ax.set_ylabel("Z Scores")
 
         if title:
             title_format = title.format(lipid=lipid, region=region)
@@ -512,14 +512,14 @@ def zscore_graph_class_average(
 
         if xlabel:
             xlabel_format = xlabel.format(lipid_class=lipid_class, region=region)
-            ax.xlabel(xlabel_format)
+            ax.set_xlabel(xlabel_format)
         else:
-            ax.xlabel("Genotype")
+            ax.set_xlabel("Genotype")
         if ylabel:
             ylabel_format = ylabel.format(lipid_class=lipid_class, region=region)
-            ax.ylabel(ylabel_format)
+            ax.set_ylabel(ylabel_format)
         else:
-            ax.ylabel("Average Z Scores")
+            ax.set_ylabel("Average Z Scores")
 
         if title:
             title_format = title.format(lipid_class=lipid_class, region=region)

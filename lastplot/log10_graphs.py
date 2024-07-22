@@ -512,15 +512,15 @@ def log_values_graph_class_average(
 
         if xlabel:
             xlabel_format = xlabel.format(lipid_class=lipid_class, region=region)
-            ax.xlabel(xlabel_format)
+            ax.set_xlabel(xlabel_format)
         else:
-            ax.xlabel("Genotype")
+            ax.set_xlabel("Genotype")
 
         if ylabel:
             ylabel_format = ylabel.format(lipid_class=lipid_class, region=region)
-            ax.ylabel(ylabel_format)
+            ax.set_ylabel(ylabel_format)
         else:
-            ax.ylabel("Average Log10 Values")
+            ax.set_ylabel("Average Log10 Values")
 
         if title:
             title_format = title.format(lipid_class=lipid_class, region=region)

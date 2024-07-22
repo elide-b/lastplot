@@ -9,7 +9,7 @@
 project = "LastPlot"
 copyright = "2024, Elide Brunelli"
 author = "Elide Brunelli"
-release = "1.1.4"
+release = "1.1.5"
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration

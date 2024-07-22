@@ -87,7 +87,7 @@ def save_zscores(df_final, output_path):
             df_save2.to_excel(
                 writer,
                 sheet_name="Z Scores",
-                startrow=0,
+                startrow=1,
                 startcol=len(df_save.columns) + 1,
             )
             print("Saving to output file")

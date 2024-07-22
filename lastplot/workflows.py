@@ -4,7 +4,7 @@ from lastplot.saving import *
 
 
 def data_workflow(
-        file_path, data_sheet, mice_sheet, output_path, control_name, experimental_name
+    file_path, data_sheet, mice_sheet, output_path, control_name, experimental_name
 ):
     """
     Automatically processes lipidomics data.

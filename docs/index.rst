@@ -53,17 +53,18 @@ Here is one example of how to use LastPlot:
 
     # Example usage
     df = lastplot.data_workflow(
-        file_path="My project.xlsx",
-        data_sheet="Data Sheet",
-        mice_sheet="Mice Sheet",
-        output_path="C:/Users/[YOUR-USERNAME]/Documents/example",
-        control_name="CM",
+    file_path="My project.xlsx",
+    data_sheet="Data Sheet",
+    mice_sheet="Mice ID Sheet",
+    output_path="C:/Users/[YOUR-USERNAME]/Documents/example",
+    control_name="WT",
+    experimental_name=["FTD", "BPD", "HFD"]
     )
 
     lastplot.zscore_graph_region(
         df_final=df,
         control_name="CM",
-        experimental_name="EM",
+        experimental_name=["FTD", "BPD", "HFD"],
         output_path="C:/Users/[YOUR-USERNAME]/Documents/example",
         palette="Set2",
         show=True,

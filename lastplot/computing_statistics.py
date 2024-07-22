@@ -4,32 +4,39 @@ import scipy.stats as stats
 from lastplot.saving import save_sheet
 
 
-def get_pvalue(test, control_values, experimental_values):
-    if any(value == "Mann Whitney" for value in test):
-        stat = "Mann Whitney"
+def get_pvalue(stat, control_values, experimental_values):
+    if stat == "Mann Whitney":
         statistics, pvalue = stats.mannwhitneyu(control_values, experimental_values)
-    elif any(value == "Welch T-Test" for value in test):
-        stat = "Welch T-Test"
+    elif stat == "Welch T-Test":
         statistics, pvalue = stats.ttest_ind(
             control_values, experimental_values, equal_var=False
         )
     else:
-        stat = "T-Test"
         statistics, pvalue = stats.ttest_ind(control_values, experimental_values)
 
-    return stat, pvalue
+    return pvalue
 
 
 def get_test(shapiro, levene):
-    test = []
     if shapiro < 0.05 and levene < 0.05:
-        test.append("T-Test")
+        test = "T-Test"
     elif shapiro < 0.05 and levene > 0.05:
-        test.append("Welch T-Test")
+        test = "Welch T-Test"
     else:
-        test.append("Mann Whitney")
+        test = "Mann Whitney"
 
     return test
+
+
+def get_stat(test):
+    if any(value == "Mann Whitney" for value in test):
+        stat = "Mann Whitney"
+    elif any(value == "Welch T-Test" for value in test):
+        stat = "Welch T-Test"
+    else:
+        stat = "T-Test"
+
+    return stat
 
 
 def pvalue_to_asterisks(pvalue):
@@ -224,7 +231,7 @@ def lipid_selection(df_final, invalid_df, control_name, output_path):
         else:
             df_final = df_final[df_final["Lipids"] != lipid]
             comment = [
-                f"{lipid} removed from all regions based on the fact it would give the same interpretation"
+                f"{lipid} removed from all regions since it would give the same interpretation"
             ]
             save_sheet(comment, sheet_name="Removed Lipids", output_path=output_path)
 

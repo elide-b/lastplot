@@ -102,7 +102,7 @@ def data_cleanup(df, df_mice, output_path):
                 & (data["Regions"] == row["Regions"])
                 & (data["Genotype"] == row["Genotype"])
                 & (data["Values"] != 0)
-                ]
+            ]
             if not group_df.empty:
                 min_value = group_df["Values"].min()
                 if min_value != 0:
@@ -118,12 +118,28 @@ def data_cleanup(df, df_mice, output_path):
     if not os.path.exists(output_path + "/output"):
         os.makedirs(output_path + "/output")
 
-    # Save the eliminated lipids and the normalized data with the Z Scores
+    df_eliminated["Values"] = "X"
+
+    df_null = df_sorted.copy()
+    df_null["Values"] = " "
+
+    df_tosave = df_eliminated.combine_first(df_null)
+
+    # Pivot the DataFrame
+    df1 = df_tosave.pivot_table(
+        index=["Regions"],
+        columns=["Lipids"],
+        values=["Values"],
+        aggfunc="first",
+    )
+    df1.reset_index(inplace=True)
+
     try:
         with pd.ExcelWriter(output_path + "/output/Output file.xlsx") as writer:
-            df_eliminated.to_excel(writer, sheet_name="Removed lipids")
+            df1.to_excel(writer, sheet_name="Removed lipids")
             print("Saving data to new Excel file")
     except PermissionError:
-        print("Close the Excel file and try again.")
+        print("Close the Excel file and try again :)")
+        exit()
 
     return df_clean, invalid_df

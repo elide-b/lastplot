@@ -33,7 +33,10 @@ def color_df(df_final, sheet, output_path):
             for cell in row:
                 cell.fill = region_fill
 
-    wb.save(output_path + "/output/Output file.xlsx")
+    try:
+        wb.save(output_path + "/output/Output file.xlsx")
+    except PermissionError:
+        print("Close the Excel file and try again :)")
 
 
 def save_values(df_final, output_path):
@@ -51,7 +54,8 @@ def save_values(df_final, output_path):
         ) as writer:
             df_save.to_excel(writer, sheet_name="Values and Transformed Values")
     except PermissionError:
-        print("Close the Excel file and try again.")
+        print("Close the Excel file and try again :)")
+        exit()
 
     color_df(df_final, sheet="Values and Transformed Values", output_path=output_path)
 
@@ -69,6 +73,7 @@ def save_zscores(df_final, output_path):
         columns=["Lipid Class"],
         values=["Average Z Scores"],
     )
+    df_save2.reset_index(inplace=True)
 
     # Save the eliminated lipids and the normalized data with the Z Scores
     try:
@@ -87,7 +92,8 @@ def save_zscores(df_final, output_path):
             )
             print("Saving to output file")
     except PermissionError:
-        print("Close the Excel file and try again.")
+        print("Close the Excel file and try again :)")
+        exit()
 
     color_df(df_final, sheet="Z Scores", output_path=output_path)
 
@@ -98,8 +104,16 @@ def save_sheet(comment, sheet_name, output_path):
         wb.create_sheet(title=sheet_name)
         ws = wb[sheet_name]
         ws.append(comment)
-        wb.save(output_path + "/output/Output file.xlsx")
+        try:
+            wb.save(output_path + "/output/Output file.xlsx")
+        except PermissionError:
+            print("Close the Excel file and try again :)")
+            exit()
     else:
         ws = wb[sheet_name]
         ws.append(comment)
-        wb.save(output_path + "/output/Output file.xlsx")
+        try:
+            wb.save(output_path + "/output/Output file.xlsx")
+        except PermissionError:
+            print("Close the Excel file and try again :)")
+            exit()

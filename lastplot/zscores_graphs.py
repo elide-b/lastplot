@@ -6,7 +6,7 @@ import seaborn as sns
 import starbars
 from scipy import stats
 
-from lastplot.computing_statistics import get_test, get_pvalue
+from lastplot.computing_statistics import get_test, get_pvalue, get_stat
 from lastplot.graph_constructor import mpl_calc_series, mpl_debug_series
 from lastplot.saving import save_sheet
 
@@ -69,6 +69,16 @@ def zscore_graph_lipid(
     if not os.path.exists(output_path + "/output/zscore_graphs/lipid"):
         os.makedirs(output_path + "/output/zscore_graphs/lipid")
 
+    test = []
+    for (region, lipid), data in df_final.groupby(["Regions", "Lipids"]):
+        shapiro = data.iloc[0]["Shapiro Normality"]
+        levene = data.iloc[0]["Levene Equality"]
+        test.append(get_test(shapiro, levene))
+
+    stat = get_stat(test)
+    test_comment = [f"{stat} will be performed for all of the lipids"]
+    save_sheet(test_comment, "Comments", output_path)
+
     for (region, lipid), data in df_final.groupby(["Regions", "Lipids"]):
         print(f"Creating graph for {lipid} in {region}")
 
@@ -108,6 +118,7 @@ def zscore_graph_lipid(
                 patch_artist=True,
                 boxprops=dict(facecolor=palette[g], color="k", alpha=0.8),
                 medianprops=dict(color="k"),
+                showfliers=False,
             )
 
             boxplot.append(bp["boxes"][0])
@@ -121,22 +132,15 @@ def zscore_graph_lipid(
             )
 
         ax.set_xticks([*range(len(genotype_labels))])
-        ax.set_xticklabels(genotype_labels, rotation=90)
+        ax.set_xticklabels(genotype_labels)
 
         # Add statistical annotation
         pairs = []
         if len(genotype_labels) <= 2:
             for element in genotype_labels:
-                shapiro = data.iloc[0]["Shapiro Normality"]
-                levene = data.iloc[0]["Levene Equality"]
-                test = get_test(shapiro, levene)
-
-                test_comment = [f"{test} will be performed for all of the lipids"]
-                save_sheet(test_comment, "Comments", output_path)
-
                 if element != control_name:
-                    stat, pvalue = get_pvalue(
-                        test,
+                    pvalue = get_pvalue(
+                        stat,
                         data[data["Genotype"] == control_name]["Z Scores"],
                         data[data["Genotype"] == element]["Z Scores"],
                     )
@@ -176,16 +180,19 @@ def zscore_graph_lipid(
         )
 
         if xlabel:
-            plt.xlabel(xlabel)
+            xlabel_format = xlabel.format(lipid=lipid, region=region)
+            ax.xlabel(xlabel_format)
         else:
-            plt.xlabel("Genotype")
+            ax.xlabel("Genotype")
         if ylabel:
-            plt.ylabel(ylabel)
+            ylabel_format = ylabel.format(lipid=lipid, region=region)
+            ax.ylabel(ylabel_format)
         else:
             plt.ylabel("Z Scores")
 
         if title:
-            ax.set_title(title)
+            title_format = title.format(lipid=lipid, region=region)
+            ax.set_title(title_format)
         else:
             ax.set_title(f"Z Scores for {lipid} in {region}")
 
@@ -288,6 +295,7 @@ def zscore_graph_lipid_class(
                         patch_artist=True,
                         boxprops=dict(facecolor=palette[g], color="k", alpha=0.8),
                         medianprops=dict(color="k"),
+                        showfliers=False,
                     )
 
                     boxplot.append(bp["boxes"][0])
@@ -301,7 +309,7 @@ def zscore_graph_lipid_class(
                     )
 
             ax.set_xticks([*range(len(lipids))])
-            ax.set_xticklabels(lipids, rotation=90)
+            ax.set_xticklabels(lipids)
             ax.legend(
                 boxplot,
                 [control_name, *experimental_name],
@@ -310,15 +318,20 @@ def zscore_graph_lipid_class(
             )
 
             if xlabel:
-                ax.set_xlabel(xlabel)
+                xlabel_format = xlabel.format(lipid_class=lipid_class, region=region)
+                ax.set_xlabel(xlabel_format)
             else:
                 ax.set_xlabel(lipid_class)
+
             if ylabel:
-                ax.set_ylabel(ylabel)
+                ylabel_format = ylabel.format(lipid_class=lipid_class, region=region)
+                ax.set_ylabel(ylabel_format)
             else:
                 ax.set_ylabel("Z Scores")
+
             if title:
-                ax.set_title(title)
+                title_format = title.format(lipid_class=lipid_class, region=region)
+                ax.set_title(title_format)
             else:
                 ax.set_title(f"Z Scores in {region}")
 
@@ -372,28 +385,30 @@ def zscore_graph_class_average(
     :param palette: Color palette for plotting.
     :param xlabel: Label for the x-axis. If None, defaults to "Genotype".
     :param ylabel: Label for the y-axis. If None, defaults to "Z Scores".
-    :param title: Title for the plot. If None, defaults to "Z Scores for {lipid} in {region}".
+    :param title: Title for the plot. If None, defaults to "Average Z Scores for {lipid_class} in {region}". It accepts {lipid_class}, {region} as changing arguments.
     :param show: Whether to display plots interactively (default True).
     """
 
-    group_width = 1
-    bar_width = 0.1
-    bar_gap = 0.01
+    group_width = 0
+    bar_width = 0.15
+    bar_gap = 0.05
     palette = sns.color_palette(palette)
 
     if not os.path.exists(output_path + "/output/zscore_graphs/class_average"):
         os.makedirs(output_path + "/output/zscore_graphs/class_average")
 
-    for (region, lipid), data in df_final.groupby(["Regions", "Lipid Class"]):
+    test = []
+    for (region, lipid), data in df_final.groupby(["Regions", "Lipids"]):
         shapiro = data.iloc[0]["Shapiro Normality"]
         levene = data.iloc[0]["Levene Equality"]
-        test = get_test(shapiro, levene)
+        test.append(get_test(shapiro, levene))
 
-    test_comment = [f"{test} will be performed for all of the lipids"]
+    stat = get_stat(test)
+    test_comment = [f"{stat} will be performed for all of the lipids"]
     save_sheet(test_comment, "Comments", output_path)
 
-    for (region, lipid), data in df_final.groupby(["Regions", "Lipid Class"]):
-        print(f"Creating graph for {lipid} in {region}")
+    for (region, lipid_class), data in df_final.groupby(["Regions", "Lipid Class"]):
+        print(f"Creating graph for {lipid_class} in {region}")
 
         fig, ax = plt.subplots()
         genotype_labels = list(data["Genotype"].unique())
@@ -426,35 +441,35 @@ def zscore_graph_class_average(
 
             bp = ax.boxplot(
                 values,
-                positions=[g],
+                positions=[positions[g][0]],
                 widths=width,
                 patch_artist=True,
+                whis=(0, 100),
                 boxprops=dict(facecolor=palette[g], color="k", alpha=0.8),
                 medianprops=dict(color="k"),
+                showfliers=False,
             )
 
             boxplot.append(bp["boxes"][0])
 
             ax.scatter(
-                np.ones(len(values)) * g,
+                np.ones(len(values)) * positions[g][0],
                 values,
                 color="k",
                 s=6,
                 zorder=3,
             )
 
-        ax.set_xticks([*range(len(genotype_labels))])
-        ax.set_xticklabels(genotype_labels, rotation=90)
+        ax.set_xticks([p[0] for p in positions])
+        ax.set_xticklabels(genotype_labels)
 
         # Add statistical annotation
         pairs = []
         if len(genotype_labels) <= 2:
             for element in genotype_labels:
-                test_comment = [f"{test} will be performed for all of the lipids"]
-                save_sheet(test_comment, "Comments", output_path)
                 if element != control_name:
-                    stat, pvalue = get_pvalue(
-                        test,
+                    pvalue = get_pvalue(
+                        stat,
                         data[data["Genotype"] == control_name]["Average Z Scores"],
                         data[data["Genotype"] == element]["Average Z Scores"],
                     )
@@ -483,7 +498,9 @@ def zscore_graph_class_average(
                         )
 
         starbars.draw_annotation(pairs, ns_show=False)
-        comment = [f"For average z scores of {lipid} in {region}, P-value is {pvalue}."]
+        comment = [
+            f"For average z scores of {lipid_class} in {region}, P-value is {pvalue}."
+        ]
         save_sheet(comment, "Comments", output_path)
 
         ax.legend(
@@ -494,23 +511,26 @@ def zscore_graph_class_average(
         )
 
         if xlabel:
-            plt.xlabel(xlabel)
+            xlabel_format = xlabel.format(lipid_class=lipid_class, region=region)
+            ax.xlabel(xlabel_format)
         else:
-            plt.xlabel("Genotype")
+            ax.xlabel("Genotype")
         if ylabel:
-            plt.ylabel(ylabel)
+            ylabel_format = ylabel.format(lipid_class=lipid_class, region=region)
+            ax.ylabel(ylabel_format)
         else:
-            plt.ylabel("Average Z Scores")
+            ax.ylabel("Average Z Scores")
 
         if title:
-            ax.set_title(title)
+            title_format = title.format(lipid_class=lipid_class, region=region)
+            ax.set_title(title_format)
         else:
-            ax.set_title(f"Average Z Scores for {lipid} in {region}")
+            ax.set_title(f"Average Z Scores for {lipid_class} in {region}")
 
         plt.tight_layout()
         plt.savefig(
             output_path
-            + f"/output/zscore_graphs/class_average/Average Z Scores for {lipid} in {region}.png",
+            + f"/output/zscore_graphs/class_average/Average Z Scores for {lipid_class} in {region}.png",
             dpi=1200,
         )
         if show:

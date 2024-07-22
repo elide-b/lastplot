@@ -6,7 +6,7 @@ import seaborn as sns
 import starbars
 from scipy import stats
 
-from lastplot.computing_statistics import get_test, get_pvalue
+from lastplot.computing_statistics import get_test, get_pvalue, get_stat
 from lastplot.graph_constructor import mpl_calc_series, mpl_debug_series
 from lastplot.saving import save_sheet
 
@@ -59,13 +59,23 @@ def log_values_graph_lipid(
     :param show: Whether to display plots interactively (default True).
     """
 
-    group_width = 0.4
-    bar_width = 0.04
-    bar_gap = 0.02
+    group_width = 1
+    bar_width = 0.1
+    bar_gap = 0.01
     palette = sns.color_palette(palette)
 
     if not os.path.exists(output_path + "/output/log_value_graphs/lipid"):
         os.makedirs(output_path + "/output/log_value_graphs/lipid")
+
+    test = []
+    for (region, lipid), data in df_final.groupby(["Regions", "Lipids"]):
+        shapiro = data.iloc[0]["Shapiro Normality"]
+        levene = data.iloc[0]["Levene Equality"]
+        test.append(get_test(shapiro, levene))
+
+    stat = get_stat(test)
+    test_comment = [f"{stat} will be performed for all of the lipids"]
+    save_sheet(test_comment, "Comments", output_path)
 
     for (region, lipid), data in df_final.groupby(["Regions", "Lipids"]):
         print(f"Creating graph for {lipid} in {region}")
@@ -106,6 +116,7 @@ def log_values_graph_lipid(
                 patch_artist=True,
                 boxprops=dict(facecolor=palette[g], color="k", alpha=0.8),
                 medianprops=dict(color="k"),
+                showfliers=False,
             )
 
             boxplot.append(bp["boxes"][0])
@@ -119,19 +130,12 @@ def log_values_graph_lipid(
             )
 
         ax.set_xticks([*range(len(genotype_labels))])
-        ax.set_xticklabels(genotype_labels, rotation=90)
+        ax.set_xticklabels(genotype_labels)
 
         # Add statistical annotation
         pairs = []
         if len(genotype_labels) <= 2:
             for element in genotype_labels:
-                shapiro = data.iloc[0]["Shapiro Normality"]
-                levene = data.iloc[0]["Levene Equality"]
-                test = get_test(shapiro, levene)
-
-                test_comment = [f"{test} will be performed for all of the lipids"]
-                save_sheet(test_comment, "Comments", output_path)
-
                 if element != control_name:
                     stat, pvalue = get_pvalue(
                         test,
@@ -174,15 +178,20 @@ def log_values_graph_lipid(
         )
 
         if xlabel:
-            ax.set_xlabel(xlabel)
+            xlabel_format = xlabel.format(lipid=lipid, region=region)
+            ax.set_xlabel(xlabel_format)
         else:
             ax.set_xlabel("Genotype")
+
         if ylabel:
-            ax.set_ylabel(ylabel)
+            ylabel_format = ylabel.format(lipid=lipid, region=region)
+            ax.set_ylabel(ylabel_format)
         else:
             ax.set_ylabel("Log10 Values")
+
         if title:
-            ax.set_title(title)
+            title_format = title.format(lipid=lipid, region=region)
+            ax.set_title(title_format)
         else:
             ax.set_title(f"Log10 Values for {lipid} in {region}")
 
@@ -231,8 +240,8 @@ def log_values_graph_lipid_class(
     :param show: Whether to display plots interactively (default True).
     """
 
-    group_width = 0.5  # space a group will take (all expressed in percentages)
-    bar_width = 0.03  # width of one boxplot
+    group_width = 1  # space a group will take (all expressed in percentages)
+    bar_width = 0.1  # width of one boxplot
     bar_gap = 0.01  # space in between groups
 
     palette = sns.color_palette(palette)
@@ -287,6 +296,7 @@ def log_values_graph_lipid_class(
                         patch_artist=True,
                         boxprops=dict(facecolor=palette[g], color="k", alpha=0.8),
                         medianprops=dict(color="k"),
+                        showfliers=False,
                     )
 
                     boxplot.append(bp["boxes"][0])
@@ -309,19 +319,22 @@ def log_values_graph_lipid_class(
             )
 
             if xlabel:
-                ax.set_xlabel(xlabel)
+                xlabel_format = xlabel.format(region=region, lipid_class=lipid_class)
+                ax.set_xlabel(xlabel_format)
             else:
                 ax.set_xlabel(lipid_class)
 
             if ylabel:
-                ax.set_ylabel(ylabel)
+                ylabel_format = ylabel.format(region=region, lipid_class=lipid_class)
+                ax.set_ylabel(ylabel_format)
             else:
                 ax.set_ylabel("Log10 Values")
 
             if title:
-                ax.set_title(title)
+                title_format = title.format(region=region, lipid_class=lipid_class)
+                ax.set_title(title_format)
             else:
-                ax.set_title(f"Log10 Values Values in {region}")
+                ax.set_title(f"Log10 Values in {region}")
 
             plt.tight_layout()
             plt.savefig(
@@ -363,7 +376,7 @@ def log_values_graph_class_average(
     - Saves each plot as a PNG file in the specified `output_path`.
     - Optionally displays the plot (`show=True`) and closes it after display.
 
-    The function also saves comments regarding the statistical tests performed for each lipid and region in an Excel
+    The function also saves comments regarding the statistical tests performed for each lipid_class and region in an Excel
     sheet named "Comments" within the `output_path`.
 
     :param df_final: DataFrame containing Z scores and statistical test results.
@@ -373,7 +386,7 @@ def log_values_graph_class_average(
     :param palette: Color palette for plotting.
     :param xlabel: Label for the x-axis. If None, defaults to "Genotype".
     :param ylabel: Label for the y-axis. If None, defaults to "Z Scores".
-    :param title: Title for the plot. If None, defaults to "Z Scores for {lipid} in {region}".
+    :param title: Title for the plot. If None, defaults to "Z Scores for {lipid_class} in {region}".
     :param show: Whether to display plots interactively (default True).
     """
 
@@ -385,13 +398,18 @@ def log_values_graph_class_average(
     if not os.path.exists(output_path + "/output/log_values/class_average"):
         os.makedirs(output_path + "/output/log_values/class_average")
 
-    for (region, lipid), data in df_final.groupby(["Regions", "Lipid Class"]):
+    test = []
+    for (region, lipid_class), data in df_final.groupby(["Regions", "Lipids"]):
         shapiro = data.iloc[0]["Shapiro Normality"]
         levene = data.iloc[0]["Levene Equality"]
-        test = get_test(shapiro, levene)
+        test.append(get_test(shapiro, levene))
 
-    for (region, lipid), data in df_final.groupby(["Regions", "Lipid Class"]):
-        print(f"Creating graph for {lipid} in {region}")
+    stat = get_stat(test)
+    test_comment = [f"{stat} will be performed for all of the lipids"]
+    save_sheet(test_comment, "Comments", output_path)
+
+    for (region, lipid_class), data in df_final.groupby(["Regions", "Lipid Class"]):
+        print(f"Creating graph for {lipid_class} in {region}")
 
         fig, ax = plt.subplots()
         genotype_labels = list(data["Genotype"].unique())
@@ -429,6 +447,7 @@ def log_values_graph_class_average(
                 patch_artist=True,
                 boxprops=dict(facecolor=palette[g], color="k", alpha=0.8),
                 medianprops=dict(color="k"),
+                showfliers=False,
             )
 
             boxplot.append(bp["boxes"][0])
@@ -442,22 +461,15 @@ def log_values_graph_class_average(
             )
 
         ax.set_xticks([*range(len(genotype_labels))])
-        ax.set_xticklabels(genotype_labels, rotation=90)
+        ax.set_xticklabels(genotype_labels)
 
         # Add statistical annotation
         pairs = []
         if len(genotype_labels) <= 2:
             for element in genotype_labels:
-                shapiro = data.iloc[0]["Shapiro Normality"]
-                levene = data.iloc[0]["Levene Equality"]
-                test = get_test(shapiro, levene)
-
-                test_comment = [f"{test} will be performed for all of the lipids"]
-                save_sheet(test_comment, "Comments", output_path)
-
                 if element != control_name:
-                    stat, pvalue = get_pvalue(
-                        test,
+                    pvalue = get_pvalue(
+                        stat,
                         data[data["Genotype"] == control_name]["Average Log10 Values"],
                         data[data["Genotype"] == element]["Average Log10 Values"],
                     )
@@ -487,7 +499,7 @@ def log_values_graph_class_average(
 
         starbars.draw_annotation(pairs, ns_show=False)
         comment = [
-            f"For average log 10 values of {lipid} in {region}, P-value is {pvalue}."
+            f"For average log 10 values of {lipid_class} in {region}, P-value is {pvalue}."
         ]
         save_sheet(comment, "Comments", output_path)
 
@@ -499,23 +511,27 @@ def log_values_graph_class_average(
         )
 
         if xlabel:
-            plt.xlabel(xlabel)
+            xlabel_format = xlabel.format(lipid_class=lipid_class, region=region)
+            ax.xlabel(xlabel_format)
         else:
-            plt.xlabel("Genotype")
+            ax.xlabel("Genotype")
+
         if ylabel:
-            plt.ylabel(ylabel)
+            ylabel_format = ylabel.format(lipid_class=lipid_class, region=region)
+            ax.ylabel(ylabel_format)
         else:
-            plt.ylabel("Average Log10 Values")
+            ax.ylabel("Average Log10 Values")
 
         if title:
-            ax.set_title(title)
+            title_format = title.format(lipid_class=lipid_class, region=region)
+            ax.set_title(title_format)
         else:
-            ax.set_title(f"Average Log10 Values for {lipid} in {region}")
+            ax.set_title(f"Average Log10 Values for {lipid_class} in {region}")
 
         plt.tight_layout()
         plt.savefig(
             output_path
-            + f"/output/zscore_graphs/class_average/Average Log10 Values for {lipid} in {region}.png",
+            + f"/output/zscore_graphs/class_average/Average Log10 Values for {lipid_class} in {region}.png",
             dpi=1200,
         )
         if show:

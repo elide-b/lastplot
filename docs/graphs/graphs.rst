@@ -31,6 +31,7 @@ These functions generate boxplots and overlaying scatter plots for visualizing l
     show=True,
     title="Scores for {lipid_class} in {region}",
 )
-   In this case the title displayed will have the corresponding plotted lipid class and region in the title.
+In this case the title displayed will have the corresponding plotted lipid class and region in the title.
+If no title or axis label is wanted, you can simply put " " as the argument of the parameter.
 
   - Plot colors are customizable by choosing a qualitative palette. Matplotlib suggested palettes are ``['Pastel1', 'Pastel2', 'Paired', 'Accent', 'Dark2', 'Set1', 'Set2', 'Set3', 'tab10', 'tab20', 'tab20b', 'tab20c']``. For black and white plots, the color palettes are ``['gray', 'Greys']``. For more information, refer to `Matplotlib Qualitative Color Maps <https://matplotlib.org/stable/users/explain/colors/colormaps.html#qualitative>`_.

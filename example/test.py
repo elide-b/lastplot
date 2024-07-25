@@ -16,4 +16,5 @@ lastplot.zscore_graph_class_average(
     output_path=".",
     palette="tab20b_r",
     show=True,
+    title="Scores for {lipid_class} in {region}",
 )

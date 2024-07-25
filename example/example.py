@@ -9,10 +9,11 @@ df = lastplot.data_workflow(
     experimental_name=["FTD", "BPD", "HFD"],
 )
 
-lastplot.log_values_graph_lipid(
+lastplot.zscore_graph_lipid(
     df,
     control_name="WT",
     experimental_name=["FTD", "BPD", "HFD"],
     output_path=".",
     palette="Set3",
+    show=False,
 )

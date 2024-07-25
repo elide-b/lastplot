@@ -3,7 +3,7 @@ from matplotlib.axes import Axes
 
 
 def mpl_calc_series(
-        n_groups, n_bars, group_width, bar_width, bar_gap, min_bar_gap=0.01
+    n_groups, n_bars, group_width, bar_width, bar_gap, min_bar_gap=0.01
 ):
     if n_bars == 1:
         return bar_width, [[i * (bar_width + bar_gap)] for i in range(n_groups)]
@@ -45,7 +45,7 @@ def mpl_calc_bar_width(n_bars, group_width, gap):
 
 
 def mpl_debug_series(
-        n_groups, n_bars, group_width, bar_width, bar_gap, ax: Axes, min_bar_gap=0.03
+    n_groups, n_bars, group_width, bar_width, bar_gap, ax: Axes, min_bar_gap=0.03
 ):
     debug = f"Input: w{bar_width:.2f}, g{bar_gap:.2f};"
     bar_gap *= n_groups

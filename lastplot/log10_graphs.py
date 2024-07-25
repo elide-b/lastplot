@@ -19,16 +19,16 @@ __all__ = [
 
 # Graphs by log10 values
 def log_values_graph_lipid(
-        df_final,
-        control_name,
-        experimental_name,
-        output_path,
-        palette,
-        xlabel=None,
-        ylabel=None,
-        title=None,
-        show=True,
-        debug=False,
+    df_final,
+    control_name,
+    experimental_name,
+    output_path,
+    palette,
+    xlabel=None,
+    ylabel=None,
+    title=None,
+    show=True,
+    debug=False,
 ):
     """
     The `log_values_graph_lipid` function generates boxplots and statistical annotations to visualize the distribution of log 10 transformed values of single lipids across regions. It performs the following tasks:
@@ -167,7 +167,7 @@ def log_values_graph_lipid(
                         )
 
         starbars.draw_annotation(pairs, ns_show=False)
-        comment = [f"For z scores of {lipid} in {region}, P-value is {pvalue}."]
+        comment = [f"For Z_Scores of {lipid} in {region}, P-value is {pvalue}."]
         save_sheet(comment, "Comments", output_path)
 
         ax.legend(
@@ -208,16 +208,16 @@ def log_values_graph_lipid(
 
 
 def log_values_graph_lipid_class(
-        df_final,
-        control_name,
-        experimental_name,
-        output_path,
-        palette,
-        xlabel=None,
-        ylabel=None,
-        title=None,
-        show=True,
-        debug=False,
+    df_final,
+    control_name,
+    experimental_name,
+    output_path,
+    palette,
+    xlabel=None,
+    ylabel=None,
+    title=None,
+    show=True,
+    debug=False,
 ):
     """
     The `log_values_graph_lipid_class` function generates boxplots to visualize the distribution of log 10 transformed values across different lipid classes within each region. It performs the following tasks:
@@ -287,7 +287,7 @@ def log_values_graph_lipid_class(
                 for g, genotype in enumerate(genotype_labels):
                     values = data[
                         (data["Lipids"] == lipid) & (data["Genotype"] == genotype)
-                        ]["Log10 Values"]
+                    ]["Log10 Values"]
 
                     bp = ax.boxplot(
                         values,
@@ -348,23 +348,23 @@ def log_values_graph_lipid_class(
 
 
 def log_values_graph_class_average(
-        df_final,
-        control_name,
-        experimental_name,
-        output_path,
-        palette,
-        xlabel=None,
-        ylabel=None,
-        title=None,
-        show=True,
-        debug=False,
+    df_final,
+    control_name,
+    experimental_name,
+    output_path,
+    palette,
+    xlabel=None,
+    ylabel=None,
+    title=None,
+    show=True,
+    debug=False,
 ):
     """
-    The `log_values_graph_class_average average` function generates boxplots and statistical annotations for visualizing average log 10 values of lipids classes
-    across regions. It performs the following tasks:
+    The `log_values_graph_class_average` function generates boxplots and statistical annotations for visualizing average log 10 values for each lipid class
+    across all regions. It performs the following tasks:
 
-    - Plots boxplots to visualize the distribution of log 10 values, distinguishing between control and experimental groups.
-    - Perform appropriate statistical tests based on the number of genotype groups and annotate the graph with p-values.
+    - Plots boxplots to visualize the distribution of log 10 values, distinguishing between control and experimental group(s).
+    - Perform appropriate statistical tests based on the number of groups:
         - If there are two genotypes:
             - Performs normality test (Shapiro-Wilk test) and homogeneity of variances test (Levene's test).
             - Based on the results, choose the appropriate test (e.g., t-test, Welch t-test, or Mann-Whitney U test).
@@ -388,6 +388,7 @@ def log_values_graph_class_average(
     :param ylabel: Label for the y-axis. If None, defaults to "Z Scores".
     :param title: Title for the plot. If None, defaults to "Z Scores for {lipid_class} in {region}".
     :param show: Whether to display plots interactively (default True).
+
     """
 
     group_width = 1

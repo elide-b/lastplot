@@ -24,6 +24,19 @@ exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
 
 # -- Options for HTML output -------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
-
 html_theme = "sphinx_book_theme"
+html_theme_options = {
+    "use_repository_button": True,
+    "repository_url": "https://github.com/elide-b/automize-science",
+    "repository_branch": "main",
+    "path_to_docs": "docs/",
+    "use_edit_page_button": True,
+    "use_issues_button": True,
+    "use_download_button": True,
+    "use_fullscreen_button": False,
+}
+
 html_static_path = ["_static"]
+html_css_files = [
+    "custom.css",
+]

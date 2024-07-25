@@ -115,14 +115,14 @@ def z_scores(df_clean, statistics):
     )
     grouped.rename(columns={"mean": "Mean", "std": "STD"}, inplace=True)
     df_final = pd.merge(df_clean, grouped, on=["Regions", "Lipids"], how="left")
-    df_final["Z Scores"] = (df_final["Log10 Values"] - df_final["Mean"]) / df_final[
+    df_final["Z_Scores"] = (df_final["Log10 Values"] - df_final["Mean"]) / df_final[
         "STD"
     ]
 
     average_z_scores = (
-        df_final.groupby(["Regions", "Lipid Class", "Mouse ID"])["Z Scores"]
+        df_final.groupby(["Regions", "Lipid Class", "Mouse ID"])["Z_Scores"]
         .mean()
-        .reset_index(name="Average Z Scores")
+        .reset_index(name="Average Z_Scores")
     )
     df_final = pd.merge(
         df_final, average_z_scores, on=["Lipid Class", "Regions", "Mouse ID"]
@@ -162,7 +162,7 @@ def lipid_selection(df_final, invalid_df, control_name, output_path):
     common_values.add("DPA (n-6)")
     common_values.add("DPA (n-3)")
     genotype_names = list(df_final["Genotype"].unique())
-    genotype_data = df_final.groupby(["Genotype"])["Average Z Scores"].apply(list)
+    genotype_data = df_final.groupby(["Genotype"])["Average Z_Scores"].apply(list)
     pvalue_without = []
     pvalue_with = []
     regions_without = []
@@ -177,9 +177,9 @@ def lipid_selection(df_final, invalid_df, control_name, output_path):
     for lipid in common_values:
         df = df_final[df_final["Lipids"] != lipid]
         for region, data in df.groupby(["Regions"]):
-            shapiro_without = stats.shapiro(data["Average Z Scores"])
+            shapiro_without = stats.shapiro(data["Average Z_Scores"])
             control_group = data[data["Genotype"] == control_name]
-            control_data = control_group["Average Z Scores"]
+            control_data = control_group["Average Z_Scores"]
             for genotype in genotype_names:
                 if genotype != control_name:
                     levene_without = stats.levene(control_data, genotype_data[genotype])
@@ -193,9 +193,9 @@ def lipid_selection(df_final, invalid_df, control_name, output_path):
     # Calculating the pvalues of Average Z Scores with the lipids
     for lipid in common_values:
         for region, data in df_final.groupby(["Regions"]):
-            shapiro_with = stats.shapiro(data["Average Z Scores"])
+            shapiro_with = stats.shapiro(data["Average Z_Scores"])
             control_group = data[data["Genotype"] == control_name]
-            control_data = control_group["Average Z Scores"]
+            control_data = control_group["Average Z_Scores"]
             for genotype in genotype_names:
                 if genotype != control_name:
                     levene_with = stats.levene(control_data, genotype_data[genotype])

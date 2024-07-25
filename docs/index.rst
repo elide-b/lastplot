@@ -1,20 +1,25 @@
 Welcome to LastPlot's documentation!
 ============================================
 
-Indices and tables
-==================
+Contents
+--------
 
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
+.. toctree::
+   :maxdepth: 1
 
-What is it
+   installation
+   usage
+   workflows/data_workflow
+   graphs/graphs
+
+
+Lastplot
 -----------
 
 Lipid Analysis and Statistical Testing with Plotting for LC-MS Output Transformation (LastPlot) is a Python package designed to elaborate data into graphs coming from lipid extractions (LC/MS). Starting from a file containing the pmol/mg values per each sample, this package streamlines the process of data analysis and visualization.
 
-Features
---------
+Key Features
+------------
 
 LastPlot includes the following features:
 
@@ -23,54 +28,7 @@ LastPlot includes the following features:
 - **Normality Check:** Use the Shapiro-Wilk test to check for normality of residuals.
 - **Equality of Variance Check:** Use Levene's test to assess the equality of variances.
 - **Statistical Significance Annotation:** Annotate boxplots with significance levels using t-test, Welch's t-test, Mann-Whitney, or two-way ANOVA test depending on the data requirements, through the starbars package.
-- **Visualization Tools:** Create boxplots to aid in data interpretation.
-
-Installation
-------------
-
-You can install the package via pip:
-
-.. code-block:: bash
-
-    pip install lastplot
-
-Alternatively, you can install the package from the source:
-
-.. code-block:: bash
-
-    git clone https://github.com/elide-b/lastplot.git
-    cd lastplot
-    pip install .
-
-Usage
------
-
-Here is one example of how to use LastPlot:
-
-.. code-block:: python
-
-    import lastplot
-
-    # Example usage
-    df = lastplot.data_workflow(
-    file_path="My project.xlsx",
-    data_sheet="Data Sheet",
-    mice_sheet="Mice ID Sheet",
-    output_path="C:/Users/[YOUR-USERNAME]/Documents/example",
-    control_name="WT",
-    experimental_name=["FTD", "BPD", "HFD"]
-    )
-
-    lastplot.zscore_graph_region(
-        df_final=df,
-        control_name="CM",
-        experimental_name=["FTD", "BPD", "HFD"],
-        output_path="C:/Users/[YOUR-USERNAME]/Documents/example",
-        palette="Set2",
-        show=True,
-    )
-
-Returns graphs.
+- **Visualization Tools:** Create boxplots with statistical annotations.
 
 Contributing
 ------------
@@ -91,9 +49,9 @@ License
 Distributed under the MIT License.
 
 
-.. toctree::
-   :maxdepth: 2
-   :caption: Contents:
+Indices and tables
+------------------
 
-   workflows/data_workflow
-   graphs/graphs
+* :ref:`genindex`
+* :ref:`modindex`
+* :ref:`search`

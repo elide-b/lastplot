@@ -3,6 +3,94 @@ import os
 import numpy as np
 import pandas as pd
 
+from lastplot.saving import write_excel
+
+
+def replace_zero_values(row, data):
+    if row["Values"] == 0:
+        group_df = data[
+            (data["Lipids"] == row["Lipids"])
+            & (data["Regions"] == row["Regions"])
+            & (data["Genotype"] == row["Genotype"])
+            & (data["Values"] != 0)
+        ]
+        if not group_df.empty:
+            min_value = group_df["Values"].min()
+            if min_value != 0:
+                new_value = 0.8 * min_value
+                return new_value
+    return row["Values"]
+
+
+def eighty_percent(df_sorted, output_path, output_file):
+    print(
+        "Replacing the zero values with 80% of the minimum value for the corresponding group"
+    )
+
+    # Replace zero values with 80% of the minimum value for the corresponding group
+    df_sorted["Values"] = df_sorted.apply(
+        lambda row: replace_zero_values(row, df_sorted), axis=1
+    )
+    df_sorted["Log10 Values"] = np.log10(df_sorted["Values"])
+
+    df_save = df_sorted.pivot_table(
+        index=["Regions", "Mouse ID", "Genotype"],
+        columns=["Lipids", "Lipid Class"],
+        values=["Values", "Log10 Values"],
+    )
+    df_save.reset_index(inplace=True)
+
+    with write_excel(output_path + "/output/" + output_file + ".xlsx") as writer:
+        df_save.to_excel(writer, sheet_name="Values and Transformed Values")
+        print("Saving data to new Excel file")
+
+    return df_sorted
+
+
+def remove_zeros(df_sorted, output_path, output_file):
+    # Removing samples with value equal to 0
+    print("Removing samples with value equal to 0")
+
+    df_no_zeros = df_sorted.replace(0, pd.NA).dropna()
+    df_no_zeros["Log10 Values"] = df_no_zeros["Values"].apply(
+        lambda x: np.log10(x) if x != 0 else 0
+    )
+
+    df_save = df_no_zeros.pivot_table(
+        index=["Regions", "Mouse ID", "Genotype"],
+        columns=["Lipids", "Lipid Class"],
+        values=["Values", "Log10 Values"],
+    )
+    df_save.reset_index(inplace=True)
+
+    with write_excel(output_path + "/output/" + output_file + ".xlsx") as writer:
+        df_save.to_excel(writer, sheet_name="Values and Transformed Values")
+        print("Saving data to new Excel file")
+
+    return df_no_zeros
+
+
+def keep_zeros(df_sorted, output_path, output_file):
+    # Keeping all the missing values = 0
+    print("Keeping all the missing values = 0")
+
+    df_sorted["Log10 Values"] = df_sorted["Values"].apply(
+        lambda x: np.log10(x) if x != 0 else 0
+    )
+
+    df_save = df_sorted.pivot_table(
+        index=["Regions", "Mouse ID", "Genotype"],
+        columns=["Lipids", "Lipid Class"],
+        values=["Values", "Log10 Values"],
+    )
+    df_save.reset_index(inplace=True)
+
+    with write_excel(output_path + "/output/" + output_file + ".xlsx") as writer:
+        df_save.to_excel(writer, sheet_name="Values and Transformed Values")
+        print("Saving data to new Excel file")
+
+    return df_sorted
+
 
 def load_data(datapath, sheet_name, mice_sheet):
     print("Loading data from " + datapath)
@@ -15,7 +103,7 @@ def load_data(datapath, sheet_name, mice_sheet):
     return df, df_mice
 
 
-def data_cleanup(df, df_mice, output_path):
+def data_cleanup(df, df_mice, mode, output_path, output_file):
     """
     Cleans and processes lipid data from the provided DataFrame.
 
@@ -30,6 +118,8 @@ def data_cleanup(df, df_mice, output_path):
     """
 
     print("Cleaning data")
+    if not os.path.exists(output_path + "/output"):
+        os.makedirs(output_path + "/output")
 
     # Eliminating the 'Internal Standard' samples
     print("Removing the Internal Standard samples")
@@ -70,76 +160,33 @@ def data_cleanup(df, df_mice, output_path):
         }
     )
 
-    print("Filtering the lipids that have 3 or more values missing")
+    # Adding short lipid names
+    short_names = {
+        "Prostaglandin": "Prostaglandins",
+        "N-Acyl-Ethanolamine": "NAEs",
+        "N-Acyl-Ethanolamine (NAE)": "NAEs",
+        "Monoacyl-glycerol": "MAGs",
+        "onoacyl-glycerol (MAG)": "MAGs",
+        "Fatty acid": "FAs",
+        "MAG derived Oxylipin": "MAG-derived Oxylipins",
+        "NAE-derived Oxylipin": "NAE-derived Oxylipins",
+        "Fatty acid derived Oxylipin": "FA-derived Oxylipins",
+        "Fatty acid-derived Oxylipin": "FA-derived Oxylipins",
+        "Fatty acid derived Oxylipins": "FA-derived Oxylipins",
+        "Specialized pro-resolving mediator": "SPMs",
+        "Specialized pro-resolving mediator (SPM)": "SPMs",
+        "Leukotriene": "Leukotrienes",
+    }
 
-    # Filter out lipids in the region where they have 3 values missing
-    def filter_lipids(df):
-        lipid_zero_counts = df.groupby("Lipids")["Values"].apply(
-            lambda x: (x == 0).sum()
-        )
-        valid_lipids = lipid_zero_counts[lipid_zero_counts < 3].index
-        invalid_lipids = lipid_zero_counts[lipid_zero_counts >= 3].index
-        valid_df = df[df["Lipids"].isin(valid_lipids)]
-        invalid_df = df[df["Lipids"].isin(invalid_lipids)]
-        return valid_df, invalid_df
-
-    df_clean = pd.DataFrame()
-    df_eliminated = pd.DataFrame()
-    for name, group in df_sorted.groupby("Regions"):
-        valid_df, invalid_df = filter_lipids(group)
-        df_clean = pd.concat([df_clean, valid_df])
-        df_eliminated = pd.concat([df_eliminated, invalid_df])
-
-    print(
-        "Replacing the zero values with 80% of the minimum value for the corresponding group"
+    df_sorted["Class Short Name"] = df_sorted["Lipid Class"].apply(
+        lambda name: short_names.get(name, name)
     )
 
-    # Replace zero values with 80% of the minimum value for the corresponding group
-    def replace_zero_values(row, data):
-        if row["Values"] == 0:
-            group_df = data[
-                (data["Lipids"] == row["Lipids"])
-                & (data["Regions"] == row["Regions"])
-                & (data["Genotype"] == row["Genotype"])
-                & (data["Values"] != 0)
-            ]
-            if not group_df.empty:
-                min_value = group_df["Values"].min()
-                if min_value != 0:
-                    new_value = 0.8 * min_value
-                    return new_value
-        return row["Values"]
+    if mode == "80percent":
+        df_clean = eighty_percent(df_sorted, output_path, output_file)
+    elif mode == "keep0":
+        df_clean = keep_zeros(df_sorted, output_path, output_file)
+    elif mode == "remove0":
+        df_clean = remove_zeros(df_sorted, output_path, output_file)
 
-    df_clean["Values"] = df_clean.apply(
-        lambda row: replace_zero_values(row, df_clean), axis=1
-    )
-    df_clean["Log10 Values"] = np.log10(df_clean["Values"])
-
-    if not os.path.exists(output_path + "/output"):
-        os.makedirs(output_path + "/output")
-
-    df_eliminated["Values"] = "X"
-
-    df_null = df_sorted.copy()
-    df_null["Values"] = " "
-
-    df_tosave = df_eliminated.combine_first(df_null)
-
-    # Pivot the DataFrame
-    df1 = df_tosave.pivot_table(
-        index=["Regions"],
-        columns=["Lipids"],
-        values=["Values"],
-        aggfunc="first",
-    )
-    df1.reset_index(inplace=True)
-
-    try:
-        with pd.ExcelWriter(output_path + "/output/Output file.xlsx") as writer:
-            df1.to_excel(writer, sheet_name="Removed lipids")
-            print("Saving data to new Excel file")
-    except PermissionError:
-        print("Close the Excel file and try again :)")
-        exit()
-
-    return df_clean, invalid_df
+    return df_clean

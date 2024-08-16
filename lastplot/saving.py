@@ -1,6 +1,8 @@
+import contextlib
 import itertools
 
 import pandas as pd
+from blessed import Terminal
 from openpyxl import load_workbook
 from openpyxl.styles import PatternFill
 
@@ -20,7 +22,7 @@ def color_df(df_final, sheet, output_path, output_file):
         for region, color in zip(unique_regions, color_cycle)
     }
 
-    with open_excel(output_path + "/" + output_file + ".xlsx") as wb:
+    with open_excel(output_path + "/output/" + output_file + ".xlsx") as wb:
         ws = wb[sheet]
 
         # Iterate through rows and apply fill colors based on 'Regions' column
@@ -35,8 +37,7 @@ def color_df(df_final, sheet, output_path, output_file):
                     cell.fill = region_fill
 
 
-
-def save_values(df_final, output_path):
+def save_values(df_final, output_path, output_file):
     df_save = df_final.pivot_table(
         index=["Regions", "Mouse ID", "Genotype"],
         columns=["Lipids", "Lipid Class"],
@@ -46,14 +47,19 @@ def save_values(df_final, output_path):
 
     # Save the eliminated lipids and the normalized data with the Z Scores
     with write_excel(
-        output_path + "/" + output_file + ".xlsx", engine="openpyxl", mode="a"
+        output_path + "/output/" + output_file + ".xlsx", engine="openpyxl", mode="a"
     ) as writer:
         df_save.to_excel(writer, sheet_name="Values and Transformed Values")
 
-    color_df(df_final, sheet="Values and Transformed Values", output_path=output_path)
+    color_df(
+        df_final,
+        sheet="Values and Transformed Values",
+        output_path=output_path,
+        output_file=output_file,
+    )
 
 
-def save_zscores(df_final, output_path):
+def save_zscores(df_final, output_path, output_file):
     df_save = df_final.pivot_table(
         index=["Regions", "Mouse ID", "Genotype"],
         columns=["Lipids", "Lipid Class"],
@@ -70,7 +76,7 @@ def save_zscores(df_final, output_path):
 
     # Save the eliminated lipids and the normalized data with the Z Scores
     with write_excel(
-        output_path + "/" + output_file + ".xlsx",
+        output_path + "/output/" + output_file + ".xlsx",
         engine="openpyxl",
         mode="a",
         if_sheet_exists="overlay",
@@ -84,11 +90,13 @@ def save_zscores(df_final, output_path):
         )
         print("Saving to output file")
 
-    color_df(df_final, sheet="Z_Scores", output_path=output_path)
+    color_df(
+        df_final, sheet="Z_Scores", output_path=output_path, output_file=output_file
+    )
 
 
 def save_sheet(comment, sheet_name, output_path, output_file):
-    path = output_path + "/" + output_file + ".xlsx"
+    path = output_path + "/output/" + output_file + ".xlsx"
     with open_excel(path) as wb:
         if sheet_name not in wb.sheetnames:
             wb.create_sheet(title=sheet_name)

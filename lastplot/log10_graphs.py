@@ -23,6 +23,7 @@ def log_values_graph_lipid(
     control_name,
     experimental_name,
     output_path,
+    output_file,
     palette,
     xlabel=None,
     ylabel=None,
@@ -52,6 +53,7 @@ def log_values_graph_lipid(
     :param control_name: Name of the control group.
     :param experimental_name: Name of the experimental group, as a list.
     :param output_path: Path to save output graphs.
+    :param output_file: Name of the output file from the cleaning step.
     :param palette: Color palette for plotting.
     :param xlabel: Label for the x-axis. If None, defaults to "Genotype".
     :param ylabel: Label for the y-axis. If None, defaults to "Log10 Values".
@@ -75,7 +77,7 @@ def log_values_graph_lipid(
 
     stat = get_stat(test)
     test_comment = [f"{stat} will be performed for all of the lipids"]
-    save_sheet(test_comment, "Comments", output_path)
+    save_sheet(test_comment, "Comments", output_path, output_file)
 
     for (region, lipid), data in df_final.groupby(["Regions", "Lipids"]):
         print(f"Creating graph for {lipid} in {region}")
@@ -146,7 +148,7 @@ def log_values_graph_lipid(
 
         else:
             test_comment = ["Anova will be performed for all of the lipids"]
-            save_sheet(test_comment, "Comments", output_path)
+            save_sheet(test_comment, "Comments", output_path, output_file)
             stat, pvalue = stats.f_oneway(
                 *[
                     data[data["Genotype"] == label]["Log10 Values"]
@@ -168,7 +170,7 @@ def log_values_graph_lipid(
 
         starbars.draw_annotation(pairs, ns_show=False)
         comment = [f"For Z_Scores of {lipid} in {region}, P-value is {pvalue}."]
-        save_sheet(comment, "Comments", output_path)
+        save_sheet(comment, "Comments", output_path, output_file)
 
         ax.legend(
             boxplot,
@@ -257,6 +259,9 @@ def log_values_graph_lipid_class(
         for i, lipid_class in enumerate(lipid_classes):
             fig, ax = plt.subplots()
             data = region_data[region_data["Lipid Class"] == lipid_class]
+            short_lipid = region_data.loc[
+                region_data["Lipid Class"] == lipid_class, "Class Short Name"
+            ].values[0]
             lipids = data["Lipids"].unique()
             genotype_labels = list(data["Genotype"].unique())
             genotype_labels.remove(control_name)
@@ -319,19 +324,25 @@ def log_values_graph_lipid_class(
             )
 
             if xlabel:
-                xlabel_format = xlabel.format(region=region, lipid_class=lipid_class)
+                xlabel_format = xlabel.format(
+                    region=region, lipid_class=lipid_class, short_name=short_lipid
+                )
                 ax.set_xlabel(xlabel_format)
             else:
                 ax.set_xlabel(lipid_class)
 
             if ylabel:
-                ylabel_format = ylabel.format(region=region, lipid_class=lipid_class)
+                ylabel_format = ylabel.format(
+                    region=region, lipid_class=lipid_class, short_name=short_lipid
+                )
                 ax.set_ylabel(ylabel_format)
             else:
                 ax.set_ylabel("Log10 Values")
 
             if title:
-                title_format = title.format(region=region, lipid_class=lipid_class)
+                title_format = title.format(
+                    region=region, lipid_class=lipid_class, short_name=short_lipid
+                )
                 ax.set_title(title_format)
             else:
                 ax.set_title(f"Log10 Values in {region}")
@@ -352,6 +363,7 @@ def log_values_graph_class_average(
     control_name,
     experimental_name,
     output_path,
+    output_file,
     palette,
     xlabel=None,
     ylabel=None,
@@ -383,6 +395,7 @@ def log_values_graph_class_average(
     :param control_name: Name of the control group.
     :param experimental_name:Name of the experimental group.
     :param output_path: Path of the output folder.
+    :param output_file: Name of the output file from the cleaning step.
     :param palette: Color palette for plotting.
     :param xlabel: Label for the x-axis. If None, defaults to "Genotype".
     :param ylabel: Label for the y-axis. If None, defaults to "Z Scores".
@@ -407,12 +420,15 @@ def log_values_graph_class_average(
 
     stat = get_stat(test)
     test_comment = [f"{stat} will be performed for all of the lipids"]
-    save_sheet(test_comment, "Comments", output_path)
+    save_sheet(test_comment, "Comments", output_path, output_file)
 
     for (region, lipid_class), data in df_final.groupby(["Regions", "Lipid Class"]):
         print(f"Creating graph for {lipid_class} in {region}")
 
         fig, ax = plt.subplots()
+        short_lipid = data.loc[
+            data["Lipid Class"] == lipid_class, "Class Short Name"
+        ].values[0]
         genotype_labels = list(data["Genotype"].unique())
         genotype_labels.remove(control_name)
         genotype_labels.insert(0, control_name)
@@ -478,7 +494,7 @@ def log_values_graph_class_average(
 
         else:
             test_comment = ["ANOVA test will be performed for all of the lipids"]
-            save_sheet(test_comment, "Comments", output_path)
+            save_sheet(test_comment, "Comments", output_path, output_file)
             stat, pvalue = stats.f_oneway(
                 *[
                     data[data["Genotype"] == label]["Average Log10 Values"]
@@ -502,7 +518,7 @@ def log_values_graph_class_average(
         comment = [
             f"For average log 10 values of {lipid_class} in {region}, P-value is {pvalue}."
         ]
-        save_sheet(comment, "Comments", output_path)
+        save_sheet(comment, "Comments", output_path, output_file)
 
         ax.legend(
             boxplot,
@@ -512,19 +528,19 @@ def log_values_graph_class_average(
         )
 
         if xlabel:
-            xlabel_format = xlabel.format(lipid_class=lipid_class, region=region)
+            xlabel_format = xlabel.format(lipid_class=lipid_class, region=region, short_name=short_lipid)
             ax.set_xlabel(xlabel_format)
         else:
             ax.set_xlabel("Genotype")
 
         if ylabel:
-            ylabel_format = ylabel.format(lipid_class=lipid_class, region=region)
+            ylabel_format = ylabel.format(lipid_class=lipid_class, region=region, short_name=short_lipid)
             ax.set_ylabel(ylabel_format)
         else:
             ax.set_ylabel("Average Log10 Values")
 
         if title:
-            title_format = title.format(lipid_class=lipid_class, region=region)
+            title_format = title.format(lipid_class=lipid_class, region=region, short_name=short_lipid)
             ax.set_title(title_format)
         else:
             ax.set_title(f"Average Log10 Values for {lipid_class} in {region}")

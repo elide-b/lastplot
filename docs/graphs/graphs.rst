@@ -29,7 +29,7 @@ Customization
 -------------
 
 - Plot colors are customizable by choosing a qualitative palette. Matplotlib suggested palettes are ``['Pastel1', 'Pastel2', 'Paired', 'Accent', 'Dark2', 'Set1', 'Set2', 'Set3', 'tab10', 'tab20', 'tab20b', 'tab20c']``. For black and white plots, the color palettes are ``['gray', 'Greys']``. For more information, refer to `Matplotlib Qualitative Color Maps <https://matplotlib.org/stable/users/explain/colors/colormaps.html#qualitative>`_.
-- X axis, Y axis, and titles of every plot are changeable with their respective parameters ``xlabel, ylabel, and title``. When giving an argument to these parameters it's important to remember that the argument given will be applied to all of the plots resulting from that function. To still have the information reguarding the lipid, lipid class or region in them, these names should be between curly brackets:
+- X axis, Y axis, and titles of every plot are changeable with their respective parameters ``xlabel, ylabel, and title``. When giving an argument to these parameters it's important to remember that the argument given will be applied to all of the plots resulting from that function. To still have the information regarding the lipid, lipid class or region in them, these names should be between curly brackets: {lipid}, {lipid_class}, or {region}. To have the short version of the lipid class name, {short_name} can be used.
 
   .. code-block:: python
 

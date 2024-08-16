@@ -1,7 +1,16 @@
 import pandas as pd
 import scipy.stats as stats
 
-from lastplot.saving import save_sheet
+from lastplot.saving import save_sheet, write_excel
+
+
+def filter_lipids(df):
+    lipid_zero_counts = df.groupby("Lipids")["Values"].apply(lambda x: (x == 0).sum())
+    valid_lipids = lipid_zero_counts[lipid_zero_counts < 3].index
+    invalid_lipids = lipid_zero_counts[lipid_zero_counts >= 3].index
+    valid_df = df[df["Lipids"].isin(valid_lipids)]
+    invalid_df = df[df["Lipids"].isin(invalid_lipids)]
+    return valid_df, invalid_df
 
 
 def get_pvalue(stat, control_values, experimental_values):
@@ -96,7 +105,7 @@ def statistics_tests(df_clean, control_name, experimental_name):
     return statistics
 
 
-def z_scores(df_clean, statistics):
+def z_scores(df_sorted, statistics, output_file, output_path):
     """
     Computes Z scores and average Z scores per lipid class, merging them into the final DataFrame.
 
@@ -106,6 +115,37 @@ def z_scores(df_clean, statistics):
     3. Calculates average Z scores per lipid class, region, and mouse ID.
     """
     print("Computing the Z scores and the average Z scores per lipid class")
+
+    # Filter out lipids in the region where they have 3 values missing
+    print("Filtering lipids that have 3 or more values missing")
+
+    df_clean = pd.DataFrame()
+    df_eliminated = pd.DataFrame()
+    for name, group in df_sorted.groupby("Regions"):
+        valid_df, invalid_df = filter_lipids(group)
+        df_clean = pd.concat([df_clean, valid_df])
+        df_eliminated = pd.concat([df_eliminated, invalid_df])
+
+    # Saving the dataframe of eliminated lipids
+    df_eliminated["Values"] = "X"
+
+    df_null = df_sorted.copy()
+    df_null["Values"] = " "
+
+    df_tosave = df_eliminated.combine_first(df_null)
+
+    df1 = df_tosave.pivot_table(
+        index=["Regions"],
+        columns=["Lipids"],
+        values=["Values"],
+        aggfunc="first",
+    )
+    df1.reset_index(inplace=True)
+
+    with write_excel(
+        output_path + "/output/" + output_file + ".xlsx", engine="openpyxl", mode="a"
+    ) as writer:
+        df1.to_excel(writer, sheet_name="Removed Lipids")
 
     # Z Scores and average Z Scores per lipid class
     grouped = (

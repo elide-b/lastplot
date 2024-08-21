@@ -6,7 +6,7 @@
 # -- Project information -----------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
-project = "LastPlot"
+project = "lastplot"
 copyright = "2024, Elide Brunelli"
 author = "Elide Brunelli"
 release = "1.2.0"
@@ -27,7 +27,7 @@ exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
 html_theme = "sphinx_book_theme"
 html_theme_options = {
     "use_repository_button": True,
-    "repository_url": "https://github.com/elide-b/automize-science",
+    "repository_url": "https://github.com/elide-b/lastplot",
     "repository_branch": "main",
     "path_to_docs": "docs/",
     "use_edit_page_button": True,

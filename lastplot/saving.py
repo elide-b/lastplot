@@ -2,7 +2,6 @@ import contextlib
 import itertools
 
 import pandas as pd
-from blessed import Terminal
 from openpyxl import load_workbook
 from openpyxl.styles import PatternFill
 
@@ -112,10 +111,9 @@ def open_excel(path: str):
     try:
         yield wb
     except PermissionError:
-        with Terminal() as term:
-            yell_at_terminal(
-                f"COULD NOT OPEN '{path}'!\n    CLOSE EXCEL FILE AND TRY AGAIN."
-            )
+        yell_at_terminal(
+            f"COULD NOT OPEN '{path}'!\n    CLOSE EXCEL FILE AND TRY AGAIN."
+        )
     finally:
         wb.close()
 
